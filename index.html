@@ -2,97 +2,116 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Battleships - Distinction Edition</title>
+    <title>Battleship War: Tactical Command</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
-        body { background: #0f172a; color: #38bdf8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(5, 45px); gap: 8px; justify-content: center; margin: 20px auto; background: #1e293b; padding: 15px; border-radius: 8px; width: fit-content; }
-        .cell { width: 45px; height: 45px; border: 1px solid #334155; background: #0f172a; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; transition: 0.2s; }
-        .cell:hover { background: #1e293b; border-color: #38bdf8; }
-        .hit { background: #ef4444 !important; color: white; border-color: #7f1d1d; }
-        .miss { background: #334155 !important; color: #94a3b8; }
-        .player-ship { border: 2px solid #22c55e; color: #22c55e; }
-        #status { font-size: 1.2rem; margin: 20px; padding: 10px; border-radius: 5px; background: #1e293b; display: inline-block; min-width: 300px; }
+        body { background: #0b0f19; color: #00ff00; font-family: 'Courier New', monospace; text-align: center; overflow-x: hidden; }
+        .game-container { position: relative; width: 800px; margin: 0 auto; background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); border: 4px solid #333; border-radius: 10px; padding: 20px; box-shadow: 0 0 50px #000; }
+        .grid-wrapper { display: flex; justify-content: space-around; margin-top: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(10, 35px); gap: 2px; border: 2px solid #00ff00; background: rgba(0, 255, 0, 0.05); }
+        .cell { width: 35px; height: 35px; border: 1px solid #114411; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+        .cell:hover { background: rgba(0, 255, 0, 0.2); }
+        .ship { background: #444; border: 2px solid #22c55e; box-shadow: inset 0 0 10px #22c55e; }
+        .hit { background: #ff4444 !important; animation: blink 0.5s infinite; }
+        .miss { background: #1e293b !important; color: #38bdf8; }
+        .status-panel { background: #000; border: 2px solid #00ff00; padding: 10px; margin: 10px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
-    <h1>BATTLESHIPS: COMMAND CENTER</h1>
-    <div id="status">INITIALIZING SYSTEMS...</div>
-    
-    <h3>YOUR FLEET</h3>
-    <div id="player-grid" class="grid"></div>
-    
-    <h3>ENEMY WATERS (CLICK TO FIRE)</h3>
-    <div id="cpu-grid" class="grid"></div>
+    <div class="game-container">
+        <h1 style="color: #fff; text-shadow: 0 0 10px #00ff00;">STRATEGY PANEL: BATTLESHIP WAR</h1>
+        <div id="status-text" class="status-panel">PHASE 1: DEPLOY YOUR FLEET (CLICK 5 SQUARES)</div>
+        
+        <div class="grid-wrapper">
+            <div>
+                <h3>YOUR TACTICAL GRID</h3>
+                <div id="player-grid" class="grid"></div>
+            </div>
+            <div>
+                <h3>ENEMY RADAR</h3>
+                <div id="cpu-grid" class="grid"></div>
+            </div>
+        </div>
+    </div>
 
     <script type="py">
 import random
 from pyscript import document
 
-# Game Setup
-SIZE = 5
-p_ships = set([(0,1), (2,3), (4,0)]) # Pre-placed for immediate play
-c_ships = set([(random.randint(0,4), random.randint(0,4)) for _ in range(3)])
+SIZE = 10
+player_ships = set()
+cpu_ships = set()
+game_phase = "SETUP" # SETUP or COMBAT
 
-def setup_boards():
-    p_div = document.getElementById("player-grid")
-    c_div = document.getElementById("cpu-grid")
+def init_game():
+    p_grid = document.getElementById("player-grid")
+    c_grid = document.getElementById("cpu-grid")
     
+    # Generate CPU Ships Hidden
+    while len(cpu_ships) < 5:
+        cpu_ships.add((random.randint(0,9), random.randint(0,9)))
+
     for r in range(SIZE):
         for c in range(SIZE):
-            # Player Board
+            # Player Setup Grid
             p_cell = document.createElement("div")
             p_cell.className = "cell"
-            if (r,c) in p_ships:
-                p_cell.classList.add("player-ship")
-                p_cell.innerText = "S"
-            else:
-                p_cell.innerText = "~"
             p_cell.id = f"p-{r}-{c}"
-            p_div.appendChild(p_cell)
+            p_cell.onclick = lambda e, row=r, col=c: handle_setup(row, col)
+            p_grid.appendChild(p_cell)
             
-            # CPU Board (Interactive)
+            # Enemy Combat Grid
             c_cell = document.createElement("div")
             c_cell.className = "cell"
-            c_cell.innerText = "?"
             c_cell.id = f"c-{r}-{c}"
-            # Logic: Assign click event to run the attack
-            c_cell.onclick = lambda e, row=r, col=c: handle_click(row, col)
-            c_div.appendChild(c_cell)
-    
-    document.getElementById("status").innerText = "SYSTEMS ONLINE: Awaiting target coordinates..."
+            c_cell.innerText = f"{chr(65+r)}{c+1}"
+            c_cell.onclick = lambda e, row=r, col=c: handle_attack(row, col)
+            c_grid.appendChild(c_cell)
 
-def handle_click(r, c):
-    global c_ships
-    target_id = f"c-{r}-{c}"
-    cell = document.getElementById(target_id)
-    status = document.getElementById("status")
+def handle_setup(r, c):
+    global game_phase
+    if game_phase != "SETUP": return
     
-    if (r, c) in c_ships:
+    cell = document.getElementById(f"p-{r}-{c}")
+    if (r, c) not in player_ships:
+        player_ships.add((r, c))
+        cell.classList.add("ship")
+        
+    if len(player_ships) >= 5:
+        game_phase = "COMBAT"
+        document.getElementById("status-text").innerText = "FLEET DEPLOYED. COMMENCE ATTACK ON ENEMY RADAR!"
+
+def handle_attack(r, c):
+    if game_phase != "COMBAT": return
+    
+    cell = document.getElementById(f"c-{r}-{c}")
+    status = document.getElementById("status-text")
+    
+    if (r, c) in cpu_ships:
         cell.classList.add("hit")
-        cell.innerText = "X"
-        c_ships.remove((r, c))
-        status.innerText = "DIRECT HIT! Intelligence suggests more targets nearby."
-        if not c_ships:
-            status.innerText = "VICTORY: ENEMY FLEET NEUTRALIZED!"
+        cell.innerText = "💥"
+        cpu_ships.remove((r, c))
+        status.innerText = "DIRECT HIT! TARGET NEUTRALIZED."
+        if not cpu_ships:
+            status.innerText = "VICTORY! YOU HAVE WON THE WAR!"
     else:
         cell.classList.add("miss")
-        cell.innerText = "O"
-        status.innerText = "MISS. Enemy is counter-attacking..."
+        cell.innerText = "•"
+        status.innerText = "MISS. ENEMY COUNTER-BATTERY DETECTED!"
         cpu_turn()
 
 def cpu_turn():
-    r, c = random.randint(0, 4), random.randint(0, 4)
-    p_cell = document.getElementById(f"p-{r}-{c}")
-    if (r, c) in p_ships:
-        p_cell.classList.add("hit")
-        p_cell.innerText = "X"
+    r, c = random.randint(0,9), random.randint(0,9)
+    cell = document.getElementById(f"p-{r}-{c}")
+    if (r, c) in player_ships:
+        cell.classList.add("hit")
+        cell.innerText = "💥"
     else:
-        p_cell.classList.add("miss")
-        p_cell.innerText = "O"
+        cell.classList.add("miss")
 
-setup_boards()
+init_game()
     </script>
 </body>
 </html>
