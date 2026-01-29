@@ -11,11 +11,12 @@
         .cell { width: 40px; height: 40px; border: 1px solid #444; background: #222; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; }
         .hit { background: #ff4444 !important; }
         .miss { background: #4444ff !important; }
+        .player-ship { border: 2px solid #00FF00; }
     </style>
 </head>
 <body>
     <h1>BATTLESHIPS: PLAYER VS COMPUTER</h1>
-    <div id="status">YOUR TURN: Click the bottom grid!</div>
+    <div id="status">YOUR TURN: Click the bottom grid to bomb the computer!</div>
     
     <h3>Your Fleet (Top)</h3>
     <div id="player-grid" class="grid"></div>
@@ -24,33 +25,33 @@
 
     <script type="py">
 import random
-from pyscript import document, when
+from pyscript import document
 
 # Game State
 size = 5
-player_ships = set([(random.randint(0,4), random.randint(0,4)) for _ in range(3)])
+player_ships = set([(0,0), (1,2), (3,4)]) # Your starting ships
 cpu_ships = set([(random.randint(0,4), random.randint(0,4)) for _ in range(3)])
 
 def init_board():
     p_grid = document.getElementById("player-grid")
     c_grid = document.getElementById("cpu-grid")
     
-    # Build Boards
     for r in range(size):
         for c in range(size):
-            # Player Cell
+            # Create Player Cell
             p_cell = document.createElement("div")
             p_cell.className = "cell"
             p_cell.id = f"p-{r}-{c}"
+            if (r,c) in player_ships: p_cell.classList.add("player-ship")
             p_cell.innerText = "S" if (r,c) in player_ships else "~"
             p_grid.appendChild(p_cell)
             
-            # CPU Cell
+            # Create Clickable CPU Cell
             c_cell = document.createElement("div")
             c_cell.className = "cell"
             c_cell.id = f"c-{r}-{c}"
             c_cell.innerText = "?"
-            # Set up the click handler for the bomb drop
+            # This 'onclick' is what lets you drop the bomb
             c_cell.onclick = lambda e, row=r, col=c: player_attack(row, col)
             c_grid.appendChild(c_cell)
 
@@ -62,9 +63,8 @@ def player_attack(r, c):
     if (r, c) in cpu_ships:
         cell.classList.add("hit")
         cpu_ships.remove((r, c))
-        status.innerText = "HIT! Go again!"
-        if not cpu_ships:
-            status.innerText = "VICTORY! ALL SHIPS SUNK!"
+        status.innerText = "HIT! You get another shot!"
+        if not cpu_ships: status.innerText = "VICTORY! ALL COMPUTER SHIPS SUNK!"
     else:
         cell.classList.add("miss")
         status.innerText = "MISS! Computer's turn..."
@@ -75,10 +75,11 @@ def computer_turn():
     cell = document.getElementById(f"p-{r}-{c}")
     if (r, c) in player_ships:
         cell.classList.add("hit")
+        player_ships.remove((r,c))
     else:
         cell.classList.add("miss")
 
 init_board()
     </script>
 </body>
-</html>
+</html>cccbeegfvicggbcceigbuhdrkvekfldtvnvblbhuvd
