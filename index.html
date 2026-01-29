@@ -156,4 +156,8 @@ def handle_keypress(e):
         status = document.getElementById("status")
         status.innerText = status.innerText.split(".")[0] + ". (ROTATED)"
 
-window.addEventListener
+window.addEventListener("keydown", handle_keypress)
+init_boards()
+    </script>
+</body>
+</html>
