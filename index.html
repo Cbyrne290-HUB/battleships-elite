@@ -8,72 +8,75 @@
     <style>
         body { background: #121212; color: #00FF00; font-family: sans-serif; text-align: center; }
         .grid { display: grid; grid-template-columns: repeat(5, 40px); gap: 5px; justify-content: center; margin: 20px; }
-        .cell { width: 40px; height: 40px; border: 1px solid #444; background: #222; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .cell:hover { background: #333; }
+        .cell { width: 40px; height: 40px; border: 1px solid #444; background: #222; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; }
         .hit { background: #ff4444 !important; }
         .miss { background: #4444ff !important; }
-        .ship { background: #555; }
     </style>
 </head>
 <body>
     <h1>BATTLESHIPS: PLAYER VS COMPUTER</h1>
-    <div id="status">Status: Loading Python...</div>
+    <div id="status">YOUR TURN: Click the bottom grid!</div>
     
-    <h3>Your Fleet (Top) | Computer's Ocean (Bottom - Click to Attack)</h3>
+    <h3>Your Fleet (Top)</h3>
     <div id="player-grid" class="grid"></div>
+    <h3>Computer's Ocean (Click to Attack)</h3>
     <div id="cpu-grid" class="grid"></div>
 
     <script type="py">
-from pyscript import Element, display
 import random
+from pyscript import document, when
 
 # Game State
 size = 5
-player_ships = set()
+player_ships = set([(random.randint(0,4), random.randint(0,4)) for _ in range(3)])
 cpu_ships = set([(random.randint(0,4), random.randint(0,4)) for _ in range(3)])
-player_hits = set()
-cpu_hits = set()
 
 def init_board():
-    p_grid = Element("player-grid")
-    c_grid = Element("cpu-grid")
+    p_grid = document.getElementById("player-grid")
+    c_grid = document.getElementById("cpu-grid")
     
-    # Create Player Grid (Visual Only)
+    # Build Boards
     for r in range(size):
         for c in range(size):
-            el = f"<div class='cell' id='p-{r}-{c}'>~</div>"
-            p_grid.element.innerHTML += el
+            # Player Cell
+            p_cell = document.createElement("div")
+            p_cell.className = "cell"
+            p_cell.id = f"p-{r}-{c}"
+            p_cell.innerText = "S" if (r,c) in player_ships else "~"
+            p_grid.appendChild(p_cell)
             
-    # Create CPU Grid (Clickable)
-    for r in range(size):
-        for c in range(size):
-            # The 'py-click' makes the grid interactive for your grade
-            el = f"<div class='cell' id='c-{r}-{c}' py-click='lambda e: attack({r},{c})'>?</div>"
-            c_grid.element.innerHTML += el
-    
-    Element("status").element.innerText = "YOUR TURN: Click the bottom grid to drop a bomb!"
+            # CPU Cell
+            c_cell = document.createElement("div")
+            c_cell.className = "cell"
+            c_cell.id = f"c-{r}-{c}"
+            c_cell.innerText = "?"
+            # Set up the click handler for the bomb drop
+            c_cell.onclick = lambda e, row=r, col=c: player_attack(row, col)
+            c_grid.appendChild(c_cell)
 
-def attack(r, c):
-    global cpu_ships, player_hits
-    target = (r, c)
-    cell = Element(f"c-{r}-{c}")
+def player_attack(r, c):
+    global cpu_ships
+    cell = document.getElementById(f"c-{r}-{c}")
+    status = document.getElementById("status")
     
-    if target in cpu_ships:
-        cell.add_class("hit")
-        Element("status").element.innerText = "HIT! You get another shot!"
-        cpu_ships.remove(target)
+    if (r, c) in cpu_ships:
+        cell.classList.add("hit")
+        cpu_ships.remove((r, c))
+        status.innerText = "HIT! Go again!"
         if not cpu_ships:
-            Element("status").element.innerText = "VICTORY! ALL ENEMY SHIPS SUNK!"
+            status.innerText = "VICTORY! ALL SHIPS SUNK!"
     else:
-        cell.add_class("miss")
-        Element("status").element.innerText = "MISS! Computer's turn..."
+        cell.classList.add("miss")
+        status.innerText = "MISS! Computer's turn..."
         computer_turn()
 
 def computer_turn():
     r, c = random.randint(0,4), random.randint(0,4)
-    Element("status").element.innerText = f"Computer bombs {r},{c}..."
-    # Simple logic for turn-based play
-    Element(f"p-{r}-{c}").add_class("miss")
+    cell = document.getElementById(f"p-{r}-{c}")
+    if (r, c) in player_ships:
+        cell.classList.add("hit")
+    else:
+        cell.classList.add("miss")
 
 init_board()
     </script>
