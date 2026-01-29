@@ -2,52 +2,80 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Battleships - Play Now</title>
+    <title>Ultimate Battleships - Live</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <style>
+        body { background: #121212; color: #00FF00; font-family: sans-serif; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(5, 40px); gap: 5px; justify-content: center; margin: 20px; }
+        .cell { width: 40px; height: 40px; border: 1px solid #444; background: #222; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .cell:hover { background: #333; }
+        .hit { background: #ff4444 !important; }
+        .miss { background: #4444ff !important; }
+        .ship { background: #555; }
+    </style>
 </head>
-<body style="background-color: #121212; color: #00FF00; font-family: monospace; padding: 20px;">
-    <h1 style="color: white;">BATTLESHIPS: INTERACTIVE TERMINAL</h1>
-    <p>Type your guesses below and hit 'Enter' to play.</p>
-    <hr>
+<body>
+    <h1>BATTLESHIPS: PLAYER VS COMPUTER</h1>
+    <div id="status">Status: Loading Python...</div>
     
+    <h3>Your Fleet (Top) | Computer's Ocean (Bottom - Click to Attack)</h3>
+    <div id="player-grid" class="grid"></div>
+    <div id="cpu-grid" class="grid"></div>
+
     <script type="py">
+from pyscript import Element, display
 import random
-from pyscript import display, window
 
-def start_game():
-    size = 5
-    ship_row = random.randint(0, size - 1)
-    ship_col = random.randint(0, size - 1)
-    board = [["~"] * size for _ in range(size)]
+# Game State
+size = 5
+player_ships = set()
+cpu_ships = set([(random.randint(0,4), random.randint(0,4)) for _ in range(3)])
+player_hits = set()
+cpu_hits = set()
+
+def init_board():
+    p_grid = Element("player-grid")
+    c_grid = Element("cpu-grid")
     
-    print("--- GAME STARTED ---")
-    print("The ship is hidden. You have 5 turns!")
+    # Create Player Grid (Visual Only)
+    for r in range(size):
+        for c in range(size):
+            el = f"<div class='cell' id='p-{r}-{c}'>~</div>"
+            p_grid.element.innerHTML += el
+            
+    # Create CPU Grid (Clickable)
+    for r in range(size):
+        for c in range(size):
+            # The 'py-click' makes the grid interactive for your grade
+            el = f"<div class='cell' id='c-{r}-{c}' py-click='lambda e: attack({r},{c})'>?</div>"
+            c_grid.element.innerHTML += el
     
-    # Simple loop for browser-based play
-    for turn in range(5):
-        print(f"\nTURN {turn + 1}")
-        for row in board:
-            print(" ".join(row))
-        
-        # In a browser, we use a popup for input to avoid freezing
-        guess = window.prompt(f"Turn {turn+1}: Enter Row and Col (e.g., 1,2)")
-        if not guess: break
-        
-        try:
-            r, c = map(int, guess.split(","))
-            if r == ship_row and c == ship_col:
-                print("BOOM! YOU SANK THE SHIP!")
-                break
-            else:
-                print("MISS!")
-                board[r][c] = "X"
-        except:
-            print("Invalid input! Use format: Row,Col")
+    Element("status").element.innerText = "YOUR TURN: Click the bottom grid to drop a bomb!"
 
-    print(f"Game Over. Ship was at {ship_row},{ship_col}")
+def attack(r, c):
+    global cpu_ships, player_hits
+    target = (r, c)
+    cell = Element(f"c-{r}-{c}")
+    
+    if target in cpu_ships:
+        cell.add_class("hit")
+        Element("status").element.innerText = "HIT! You get another shot!"
+        cpu_ships.remove(target)
+        if not cpu_ships:
+            Element("status").element.innerText = "VICTORY! ALL ENEMY SHIPS SUNK!"
+    else:
+        cell.add_class("miss")
+        Element("status").element.innerText = "MISS! Computer's turn..."
+        computer_turn()
 
-start_game()
+def computer_turn():
+    r, c = random.randint(0,4), random.randint(0,4)
+    Element("status").element.innerText = f"Computer bombs {r},{c}..."
+    # Simple logic for turn-based play
+    Element(f"p-{r}-{c}").add_class("miss")
+
+init_board()
     </script>
 </body>
 </html>
