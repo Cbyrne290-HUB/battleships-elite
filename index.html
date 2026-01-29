@@ -6,73 +6,92 @@
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
-        :root { --neon: #22c55e; --bg: #020617; }
-        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; text-align: center; margin: 0; }
-        .hud { width: 1000px; margin: 20px auto; padding: 20px; border: 2px solid #1e293b; background: #0f172a; position: relative; }
+        :root { --neon: #22c55e; --bg: #020617; --hit: #ef4444; }
+        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; align-items: center; }
         
-        .main-layout { display: flex; justify-content: center; gap: 30px; margin-top: 20px; }
-        
-        /* Hangar */
-        .hangar { width: 200px; display: flex; flex-direction: column; gap: 10px; border: 1px dashed #334155; padding: 10px; }
-        .drag-ship { background: rgba(34, 197, 94, 0.1); border: 1px solid var(--neon); cursor: grab; padding: 5px; font-size: 10px; }
+        .hud { width: 1100px; margin: 20px; padding: 20px; background: #0f172a; border: 2px solid #1e293b; border-radius: 10px; position: relative; }
+        .main-layout { display: flex; justify-content: space-between; gap: 15px; }
+
+        /* SHIP VISUALS (Replacing boxes with silhouettes) */
+        .ship-hangar { width: 220px; display: flex; flex-direction: column; gap: 15px; }
+        .ship-img { 
+            background: #1e293b; border: 1px solid var(--neon); cursor: grab;
+            display: flex; align-items: center; justify-content: center; font-weight: bold;
+            text-shadow: 0 0 5px var(--neon); position: relative;
+        }
+        /* Visual shapes for ships */
+        #s0 { height: 60px; width: 120px; clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%); } /* Carrier */
+        #s1 { height: 32px; width: 190px; border-radius: 50% 50% 5px 5px; } /* Dreadnought */
+        #s2 { height: 25px; width: 90px; border-radius: 20px; } /* Submarine */
+        #s3 { height: 30px; width: 150px; clip-path: polygon(0 50%, 20% 0, 80% 0, 100% 50%, 80% 100%, 20% 100%); } /* Frigate */
 
         /* Grids */
-        .grid { display: grid; grid-template-columns: 30px repeat(12, 32px); gap: 1px; background: var(--neon); border: 1px solid var(--neon); }
-        .cell { width: 32px; height: 32px; background: var(--bg); position: relative; }
-        .label { background: #0f172a; color: var(--neon); display: flex; align-items: center; justify-content: center; font-size: 10px; }
-
-        /* Statuses */
-        .placed { background: #475569 !important; border: 1px solid #94a3b8; }
-        .hit { background: #ef4444 !important; color: white; display: flex; align-items: center; justify-content: center; }
-        .miss { background: #38bdf8 !important; opacity: 0.3; }
+        .grid { display: grid; grid-template-columns: 30px repeat(12, 32px); gap: 1px; background: #334155; }
+        .cell { width: 32px; height: 32px; background: var(--bg); transition: 0.2s; position: relative; }
+        .label { color: var(--neon); font-size: 10px; display: flex; align-items: center; justify-content: center; background: #0f172a; }
         
+        /* Combat Visuals */
+        .placed { background: #334155 !important; border: 1px solid var(--neon); }
+        .hit { background: var(--hit) !important; animation: blink 0.5s infinite; }
+        .miss { background: #38bdf8 !important; opacity: 0.3; }
+        .sunk-alert { color: var(--hit); font-weight: bold; font-size: 20px; animation: pop 1s ease-out forwards; }
+
+        /* Fleet Status Tracker (Left Side) */
+        .fleet-status { font-size: 12px; margin-top: 10px; }
+        .status-item { margin: 5px 0; display: flex; justify-content: space-between; padding: 2px 5px; border-bottom: 1px solid #1e293b; }
+        .is-sunk { color: var(--hit); text-decoration: line-through; }
+
         /* Win Overlay */
         #win-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: none; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 100;
+            background: rgba(0,0,0,0.9); display: none; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 1000;
         }
-        .win-box { border: 4px solid var(--neon); padding: 50px; box-shadow: 0 0 50px var(--neon); }
 
-        .controls { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
-        button { background: var(--neon); color: black; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1.5); opacity: 0; } }
     </style>
 </head>
 <body>
 
 <div id="win-overlay">
-    <div class="win-box">
-        <h1 style="font-size: 60px;">YOU WIN</h1>
-        <p>MISSION ACCOMPLISHED. ENEMY SUNK.</p>
-        <button onclick="location.reload()">REDEPLOY</button>
+    <div style="border: 4px solid var(--neon); padding: 50px; text-align: center; background: #000;">
+        <h1 style="font-size: 70px; margin: 0;">YOU WIN</h1>
+        <h2 id="final-score">SCORE: 1245</h2>
+        <button onclick="location.reload()" style="background: var(--neon); padding: 10px 20px; border: none; cursor: pointer;">RE-DEPLOY</button>
     </div>
 </div>
 
 <div class="hud">
-    <h1>STRATEGY PANEL</h1>
-    <div id="status">DRAG SHIPS TO GRID. PRESS 'R' TO ROTATE.</div>
+    <h2 style="text-align: center; margin: 0; letter-spacing: 3px;">TACTICAL COMMAND PANEL</h2>
+    <div id="status-bar" style="text-align: center; color: #fb923c; margin: 10px; height: 20px;">DEPLOY FLEET TO START</div>
 
     <div class="main-layout">
-        <div class="hangar">
-            <div class="drag-ship" draggable="true" id="s0">CARRIER (4x2)</div>
-            <div class="drag-ship" draggable="true" id="s1">DREADNOUGHT (6x1)</div>
-            <div class="drag-ship" draggable="true" id="s2">SUBMARINE (3x1)</div>
-            <div class="drag-ship" draggable="true" id="s3">FRIGATE (5x1)</div>
+        <div class="ship-hangar">
+            <p style="font-size: 10px; color: #64748b;">AVAILABLE HANGAR</p>
+            <div class="ship-img" draggable="true" id="s0">CARRIER</div>
+            <div class="ship-img" draggable="true" id="s1">DREADNOUGHT</div>
+            <div class="ship-img" draggable="true" id="s2">SUB</div>
+            <div class="ship-img" draggable="true" id="s3">FRIGATE</div>
+            
+            <div class="fleet-status" id="fleet-ui">
+                <p>ENEMY FLEET STATUS</p>
+                <div id="stat-0" class="status-item">CARRIER <span>ACTIVE</span></div>
+                <div id="stat-1" class="status-item">DREADNOUGHT <span>ACTIVE</span></div>
+                <div id="stat-2" class="status-item">SUBMARINE <span>ACTIVE</span></div>
+                <div id="stat-3" class="status-item">FRIGATE <span>ACTIVE</span></div>
+            </div>
         </div>
 
         <div>
             <div id="p-grid" class="grid"></div>
-            <p>TACTICAL GRID</p>
+            <p style="text-align: center; font-size: 10px;">STRATEGY GRID</p>
         </div>
 
-        <div id="enemy-area" style="display:none;">
+        <div id="enemy-radar" style="opacity: 0.3; pointer-events: none;">
             <div id="e-grid" class="grid"></div>
-            <p>ENEMY RADAR</p>
+            <p style="text-align: center; font-size: 10px;">ENEMY RADAR</p>
         </div>
-    </div>
-
-    <div class="controls">
-        <button id="start-btn" style="display:none;">START BATTLE</button>
     </div>
 </div>
 
@@ -80,23 +99,23 @@
 from pyscript import document, window
 import random
 
-# Config
 SHIP_SPECS = [
-    {"id": 0, "size": (4, 2)}, {"id": 1, "size": (6, 1)},
-    {"id": 2, "size": (3, 1)}, {"id": 3, "size": (5, 1)}
+    {"id": 0, "name": "CARRIER", "size": (4, 2)},
+    {"id": 1, "name": "DREADNOUGHT", "size": (6, 1)},
+    {"id": 2, "name": "SUBMARINE", "size": (3, 1)},
+    {"id": 3, "name": "FRIGATE", "size": (5, 1)}
 ]
 SIZE = 12
-player_fleet = []
-enemy_fleet = []
-is_horiz = True
+player_fleet, enemy_fleet = [], []
+turn_active = False
 
 def init():
     for g_id in ["p-grid", "e-grid"]:
-        g = document.getElementById(g_id)
-        g.appendChild(create_cell("", "label"))
-        for i in range(1, SIZE+1): g.appendChild(create_cell(str(i), "label"))
+        grid = document.getElementById(g_id)
+        grid.appendChild(create_cell("", "label"))
+        for i in range(1, SIZE+1): grid.appendChild(create_cell(str(i), "label"))
         for r in range(SIZE):
-            g.appendChild(create_cell(chr(65+r), "label"))
+            grid.appendChild(create_cell(chr(65+r), "label"))
             for c in range(SIZE):
                 cell = create_cell("", "cell")
                 cell.id = f"{g_id[0]}-{r}-{c}"
@@ -104,8 +123,8 @@ def init():
                     cell.ondragover = lambda e: e.preventDefault()
                     cell.ondrop = lambda e, row=r, col=c: handle_drop(e, row, col)
                 else:
-                    cell.onclick = lambda e, row=r, col=c: attack(row, col)
-                g.appendChild(cell)
+                    cell.onclick = lambda e, row=r, col=c: player_attack(row, col)
+                grid.appendChild(cell)
     setup_enemy()
 
 def create_cell(t, cls):
@@ -117,63 +136,79 @@ def create_cell(t, cls):
 def handle_drop(event, r, c):
     s_id = int(event.dataTransfer.getData("text"))
     spec = SHIP_SPECS[s_id]
-    w, h = spec["size"] if is_horiz else (spec["size"][1], spec["size"][0])
-    
-    if r+h <= SIZE and c+w <= SIZE:
+    w, h = spec["size"]
+    if r + h <= SIZE and c + w <= SIZE:
         coords = set((r+i, c+j) for i in range(h) for j in range(w))
         if any(coords & s["coords"] for s in player_fleet): return
-        
-        for row, col in coords:
-            document.getElementById(f"p-{row}-{col}").classList.add("placed")
-        
-        player_fleet.append({"coords": coords, "hp": len(coords)})
-        document.getElementById(f"s{s_id}").style.display = "none"
-        
+        for pr, pc in coords: document.getElementById(f"p-{pr}-{pc}").classList.add("placed")
+        player_fleet.append({"name": spec["name"], "coords": coords, "hp": len(coords)})
+        document.getElementById(f"s{s_id}").style.opacity = "0.1"
         if len(player_fleet) == len(SHIP_SPECS):
-            document.getElementById("start-btn").style.display = "block"
+            global turn_active
+            turn_active = True
+            document.getElementById("enemy-radar").style.opacity = "1"
+            document.getElementById("enemy-radar").style.pointerEvents = "all"
+            document.getElementById("status-bar").innerText = "ALL SHIPS DEPLOYED. COMMENCE FIRE!"
 
 def setup_enemy():
     for spec in SHIP_SPECS:
         placed = False
         while not placed:
-            r, c, rot = random.randint(0,11), random.randint(0,11), random.choice([True, False])
-            w, h = spec["size"] if rot else (spec["size"][1], spec["size"][0])
+            r, c = random.randint(0, SIZE-1), random.randint(0, SIZE-1)
+            w, h = spec["size"]
             if r+h <= SIZE and c+w <= SIZE:
                 coords = set((r+i, c+j) for i in range(h) for j in range(w))
                 if not any(coords & s["coords"] for s in enemy_fleet):
-                    enemy_fleet.append({"coords": coords, "hp": len(coords)})
+                    enemy_fleet.append({"id": spec["id"], "name": spec["name"], "coords": coords, "hp": len(coords)})
                     placed = True
 
-def attack(r, c):
+def player_attack(r, c):
+    global turn_active
+    if not turn_active: return
     cell = document.getElementById(f"e-{r}-{c}")
     if "hit" in cell.className or "miss" in cell.className: return
+    
     hit = False
-    for s in enemy_fleet:
-        if (r, c) in s["coords"]:
-            cell.classList.add("hit"); cell.innerText = "X"; s["hp"] -= 1; hit = True
-            if all(ship["hp"] == 0 for ship in enemy_fleet):
-                document.getElementById("win-overlay").style.display = "flex"
+    for ship in enemy_fleet:
+        if (r, c) in ship["coords"]:
+            cell.classList.add("hit")
+            ship["hp"] -= 1
+            hit = True
+            if ship["hp"] == 0:
+                document.getElementById(f"stat-{ship['id']}").innerHTML = f"{ship['name']} <span class='is-sunk'>SUNK</span>"
+                document.getElementById("status-bar").innerText = f"DIRECT HIT! ENEMY {ship['name']} SUNK!"
+            check_win()
             break
     if not hit: cell.classList.add("miss")
+    
+    # Computer plays back immediately
+    window.setTimeout(lambda: enemy_counter_attack(), 500)
+
+def enemy_counter_attack():
+    valid = False
+    while not valid:
+        r, c = random.randint(0, SIZE-1), random.randint(0, SIZE-1)
+        cell = document.getElementById(f"p-{r}-{c}")
+        if "hit" not in cell.className and "miss" not in cell.className:
+            valid = True
+            hit = False
+            for ship in player_fleet:
+                if (r, c) in ship["coords"]:
+                    cell.classList.add("hit")
+                    hit = True; break
+            if not hit: cell.classList.add("miss")
+
+def check_win():
+    if all(s["hp"] == 0 for s in enemy_fleet):
+        document.getElementById("win-overlay").style.display = "flex"
 
 def on_drag_start(event):
     event.dataTransfer.setData("text", event.target.id[1:])
 
-def rotate(event):
-    if event.key.lower() == 'r':
-        global is_horiz
-        is_horiz = not is_horiz
-        document.getElementById("status").innerText = f"ROTATION: {'HORIZ' if is_horiz else 'VERT'}"
-
-def start_battle(e):
-    document.getElementById("enemy-area").style.display = "block"
-    document.getElementById("status").innerText = "ATTACK ENEMY RADAR"
-
-init()
 window.on_drag_start = on_drag_start
 for i in range(4): document.getElementById(f"s{i}").ondragstart = on_drag_start
-window.addEventListener("keydown", rotate)
-document.getElementById("start-btn").onclick = start_battle
+
+init()
 </script>
 </body>
 </html>
