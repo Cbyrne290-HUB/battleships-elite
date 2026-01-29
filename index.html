@@ -2,32 +2,52 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Battleships Live</title>
+    <title>Battleships - Play Now</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 </head>
-<body style="background-color: #121212; color: #00FF00; font-family: 'Courier New', monospace; padding: 40px;">
-    <h1 style="color: white;">BATTLESHIPS: DEPLOYED VERSION</h1>
-    <p style="color: #888;">Initializing Python Environment... Please wait 5 seconds.</p>
+<body style="background-color: #121212; color: #00FF00; font-family: monospace; padding: 20px;">
+    <h1 style="color: white;">BATTLESHIPS: INTERACTIVE TERMINAL</h1>
+    <p>Type your guesses below and hit 'Enter' to play.</p>
     <hr>
     
-    <script type="py" terminal>
+    <script type="py">
 import random
+from pyscript import display, window
 
-def play_game():
-    print("--- WELCOME TO BATTLESHIPS LIVE ---")
+def start_game():
     size = 5
     ship_row = random.randint(0, size - 1)
     ship_col = random.randint(0, size - 1)
+    board = [["~"] * size for _ in range(size)]
     
-    print(f"The enemy ship is hidden in a {size}x{size} grid.")
-    print("This game is running live via GitHub Pages!")
-    print("-----------------------------------")
-    print(f"Assessor Note: Ship is at Row {ship_row}, Col {ship_col}")
-    print("Deployment Successful: LO9.1 Satisfied.")
+    print("--- GAME STARTED ---")
+    print("The ship is hidden. You have 5 turns!")
+    
+    # Simple loop for browser-based play
+    for turn in range(5):
+        print(f"\nTURN {turn + 1}")
+        for row in board:
+            print(" ".join(row))
+        
+        # In a browser, we use a popup for input to avoid freezing
+        guess = window.prompt(f"Turn {turn+1}: Enter Row and Col (e.g., 1,2)")
+        if not guess: break
+        
+        try:
+            r, c = map(int, guess.split(","))
+            if r == ship_row and c == ship_col:
+                print("BOOM! YOU SANK THE SHIP!")
+                break
+            else:
+                print("MISS!")
+                board[r][c] = "X"
+        except:
+            print("Invalid input! Use format: Row,Col")
 
-play_game()
+    print(f"Game Over. Ship was at {ship_row},{ship_col}")
+
+start_game()
     </script>
 </body>
 </html>
