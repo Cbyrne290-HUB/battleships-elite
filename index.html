@@ -2,43 +2,39 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Battleship War: Advanced Command</title>
+    <title>Tactical Command: Strategy Panel</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
-        body { background: #0b0f19; color: #00ff00; font-family: 'Courier New', monospace; text-align: center; }
-        .game-container { width: 950px; margin: 0 auto; background: #1e293b; border: 4px solid #334155; padding: 20px; border-radius: 15px; }
-        .grid-layout { display: flex; justify-content: space-around; gap: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(12, 30px); gap: 2px; background: #0f172a; padding: 10px; border: 2px solid #38bdf8; }
-        .cell { width: 30px; height: 30px; border: 1px solid #1e293b; background: rgba(56, 189, 248, 0.1); cursor: pointer; position: relative; }
-        .ship-part { background: #64748b; border: 1px solid #94a3b8; }
-        .hit { background: #ef4444 !important; }
-        .miss { background: #334155 !important; }
-        .controls { margin: 20px; padding: 15px; background: #0f172a; border: 1px dashed #00ff00; }
-        .health-bar { width: 200px; height: 20px; background: #444; margin: 10px auto; border: 1px solid #fff; }
+        body { background: #020617; color: #22c55e; font-family: 'Courier New', monospace; text-align: center; }
+        .hud-container { width: 1000px; margin: 20px auto; border: 2px solid #1e293b; background: #0f172a; padding: 20px; box-shadow: 0 0 20px #000; }
+        .grid-container { display: flex; justify-content: center; gap: 40px; margin-top: 20px; }
+        .grid { display: grid; grid-template-columns: 30px repeat(12, 35px); gap: 1px; background: #1e293b; border: 1px solid #334155; }
+        .cell { width: 35px; height: 35px; background: #020617; border: 1px solid #1e293b; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; }
+        .label { background: #0f172a; color: #64748b; font-weight: bold; cursor: default; }
+        .ship-block { background: #475569; border: 1px solid #94a3b8; box-shadow: inset 0 0 8px #000; }
+        .hit { background: #ef4444 !important; color: white; }
+        .miss { background: #38bdf8 !important; opacity: 0.5; }
+        .status-box { background: #000; border: 1px solid #22c55e; padding: 15px; margin-bottom: 20px; font-weight: bold; }
+        .health-bar { width: 100%; height: 10px; background: #334155; margin: 5px 0; }
         .health-fill { height: 100%; background: #22c55e; transition: width 0.3s; }
-        button { background: #00ff00; color: #000; padding: 10px; font-weight: bold; cursor: pointer; border: none; }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>BATTLESHIP WAR: TACTICAL HUD</h1>
-        <div id="status" class="controls">PHASE 1: PLACE YOUR 4x2 CARRIER. PRESS 'R' TO ROTATE.</div>
+    <div class="hud-container">
+        <div class="status-box" id="status-panel">COMMANDER: PLACE 4x2 CARRIER. PRESS 'R' TO ROTATE SHIP.</div>
         
-        <div class="grid-layout">
+        <div class="grid-container">
             <div>
-                <h3>YOUR FLEET HEALTH</h3>
-                <div class="health-bar"><div id="p-health" class="health-fill" style="width: 100%;"></div></div>
+                <p>YOUR STRATEGY PANEL</p>
+                <div class="health-bar"><div id="p-hp" class="health-fill" style="width: 100%;"></div></div>
                 <div id="player-grid" class="grid"></div>
             </div>
             <div>
-                <h3>ENEMY FLEET HEALTH</h3>
-                <div class="health-bar"><div id="e-health" class="health-fill" style="width: 100%;"></div></div>
+                <p>ENEMY TACTICAL GRID</p>
+                <div class="health-bar"><div id="e-hp" class="health-fill" style="width: 100%;"></div></div>
                 <div id="enemy-grid" class="grid"></div>
             </div>
-        </div>
-        <div style="margin-top: 20px;">
-            <button onclick="location.reload()">RESTART MISSION</button>
         </div>
     </div>
 
@@ -46,118 +42,116 @@
 import random
 from pyscript import document, window
 
-# Ship Config: (Width, Height)
-FLEET_CONFIG = [(4, 2), (6, 1), (3, 1), (5, 1), (5, 1)]
+# Ship sizes per your request
+FLEET = [(4,2), (6,1), (3,1), (5,1), (5,1)]
 SIZE = 12
+p_fleet = set()
+e_fleet = set()
+current_idx = 0
+horiz = True
+phase = "SETUP"
 
-player_ships_coords = set()
-cpu_ships_coords = set()
-current_ship_idx = 0
-is_horizontal = True
-game_phase = "SETUP"
+def build_grids():
+    for grid_id in ["player-grid", "enemy-grid"]:
+        el = document.getElementById(grid_id)
+        # Header Row (1-12)
+        el.appendChild(create_cell("", "label"))
+        for i in range(1, SIZE+1): el.appendChild(create_cell(str(i), "label"))
+        
+        for r in range(SIZE):
+            # Row Label (A-L)
+            el.appendChild(create_cell(chr(65+r), "label"))
+            for c in range(SIZE):
+                cell = create_cell("", "cell")
+                cell.id = f"{grid_id[0]}-{r}-{c}"
+                if grid_id.startswith("p"):
+                    cell.onclick = lambda e, row=r, col=c: place_ship(row, col)
+                else:
+                    cell.onclick = lambda e, row=r, col=c: attack(row, col)
+                el.appendChild(cell)
 
-# Health Tracking
-total_parts = sum(w * h for w, h in FLEET_CONFIG)
-p_health = total_parts
-e_health = total_parts
-
-def init_boards():
-    p_grid = document.getElementById("player-grid")
-    e_grid = document.getElementById("enemy-grid")
-    
-    for r in range(SIZE):
-        for c in range(SIZE):
-            # Player Grid
-            p_cell = document.createElement("div")
-            p_cell.className = "cell"
-            p_cell.id = f"p-{r}-{c}"
-            p_cell.onclick = lambda e, row=r, col=c: place_ship(row, col)
-            p_grid.appendChild(p_cell)
-            
-            # Enemy Grid
-            e_cell = document.createElement("div")
-            e_cell.className = "cell"
-            e_cell.id = f"e-{r}-{c}"
-            e_cell.onclick = lambda e, row=r, col=c: attack_enemy(row, col)
-            e_grid.appendChild(e_cell)
-    
-    # Pre-gen CPU ships
-    for ship in FLEET_CONFIG:
+    # Randomly place CPU fleet
+    total_parts = 0
+    for ship in FLEET:
+        total_parts += ship[0] * ship[1]
         placed = False
         while not placed:
-            sr, sc = random.randint(0, 11), random.randint(0, 11)
-            horiz = random.choice([True, False])
-            w, h = (ship[0], ship[1]) if horiz else (ship[1], ship[0])
-            if sr + h <= SIZE and sc + w <= SIZE:
-                new_coords = set((sr+i, sc+j) for i in range(h) for j in range(w))
-                if not (new_coords & cpu_ships_coords):
-                    cpu_ships_coords.update(new_coords)
+            r, c = random.randint(0,11), random.randint(0,11)
+            h_rot = random.choice([True, False])
+            w, h = (ship[0], ship[1]) if h_rot else (ship[1], ship[0])
+            if r+h <= SIZE and c+w <= SIZE:
+                coords = set((r+i, c+j) for i in range(h) for j in range(w))
+                if not (coords & e_fleet):
+                    e_fleet.update(coords)
                     placed = True
+    return total_parts
+
+def create_cell(txt, cls):
+    c = document.createElement("div")
+    c.className = cls
+    c.innerText = txt
+    return c
 
 def place_ship(r, c):
-    global current_ship_idx, game_phase
-    if game_phase != "SETUP": return
+    global current_idx, phase
+    if phase != "SETUP": return
+    ship = FLEET[current_idx]
+    w, h = (ship[0], ship[1]) if horiz else (ship[1], ship[0])
     
-    ship = FLEET_CONFIG[current_ship_idx]
-    w, h = (ship[0], ship[1]) if is_horizontal else (ship[1], ship[0])
-    
-    if r + h <= SIZE and c + w <= SIZE:
-        new_parts = set((r+i, c+j) for i in range(h) for j in range(w))
-        if not (new_parts & player_ships_coords):
-            for pr, pc in new_parts:
-                document.getElementById(f"p-{pr}-{pc}").classList.add("ship-part")
-            player_ships_coords.update(new_parts)
-            current_ship_idx += 1
-            
-            if current_ship_idx < len(FLEET_CONFIG):
-                next_ship = FLEET_CONFIG[current_ship_idx]
-                document.getElementById("status").innerText = f"PLACE YOUR {next_ship[0]}x{next_ship[1]} SHIP. PRESS 'R' TO ROTATE."
+    if r+h <= SIZE and c+w <= SIZE:
+        new_coords = set((r+i, c+j) for i in range(h) for j in range(w))
+        if not (new_coords & p_fleet):
+            for pr, pc in new_coords:
+                document.getElementById(f"p-{pr}-{pc}").classList.add("ship-block")
+            p_fleet.update(new_coords)
+            current_idx += 1
+            if current_idx < len(FLEET):
+                nxt = FLEET[current_idx]
+                document.getElementById("status-panel").innerText = f"PLACE {nxt[0]}x{nxt[1]} SHIP. PRESS 'R' TO ROTATE."
             else:
-                game_phase = "COMBAT"
-                document.getElementById("status").innerText = "ALL SHIPS DEPLOYED. OPEN FIRE ON ENEMY GRID!"
+                phase = "BATTLE"
+                document.getElementById("status-panel").innerText = "FLEET DEPLOYED. COMMENCE ATTACK ON ENEMY GRID."
 
-def attack_enemy(r, c):
-    global e_health
-    if game_phase != "COMBAT": return
+def attack(r, c):
+    global e_fleet
+    if phase != "BATTLE": return
     cell = document.getElementById(f"e-{r}-{c}")
     if cell.classList.contains("hit") or cell.classList.contains("miss"): return
-
-    if (r, c) in cpu_ships_coords:
+    
+    if (r, c) in e_fleet:
         cell.classList.add("hit")
-        e_health -= 1
-        update_health()
-        if e_health <= 0: document.getElementById("status").innerText = "VICTORY: ENEMY SUNK!"
+        cell.innerText = "X"
+        e_fleet.remove((r, c))
+        update_hp()
+        if not e_fleet: document.getElementById("status-panel").innerText = "VICTORY: ENEMY SUNK!"
     else:
         cell.classList.add("miss")
         cpu_turn()
 
 def cpu_turn():
-    global p_health
     r, c = random.randint(0,11), random.randint(0,11)
     cell = document.getElementById(f"p-{r}-{c}")
-    if (r, c) in player_ships_coords:
+    if (r, c) in p_fleet:
         cell.classList.add("hit")
-        p_health -= 1
-        update_health()
+        p_fleet.remove((r,c))
+        update_hp()
     else:
         cell.classList.add("miss")
 
-def update_health():
-    p_perc = (p_health / total_parts) * 100
-    e_perc = (e_health / total_parts) * 100
-    document.getElementById("p-health").style.width = f"{p_perc}%"
-    document.getElementById("e-health").style.width = f"{e_perc}%"
+def update_hp():
+    p_pct = (len(p_fleet) / TOTAL_P) * 100
+    e_pct = (len(e_fleet) / TOTAL_P) * 100
+    document.getElementById("p-hp").style.width = f"{p_pct}%"
+    document.getElementById("e-hp").style.width = f"{e_pct}%"
 
-# Key listener for rotation
-def handle_keypress(e):
-    global is_horizontal
-    if e.key.lower() == 'r':
-        is_horizontal = not is_horizontal
-        status = document.getElementById("status")
-        status.innerText = status.innerText.split(".")[0] + ". (ROTATED)"
+def rotate(e):
+    global horiz
+    if e.key.lower() == 'r': 
+        horiz = not horiz
+        document.getElementById("status-panel").innerText += " (ROTATED)"
 
-window.addEventListener("keydown", handle_keypress)
-init_boards()
+TOTAL_P = build_grids()
+window.addEventListener("keydown", rotate)
     </script>
 </body>
 </html>
