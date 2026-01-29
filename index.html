@@ -2,84 +2,97 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Ultimate Battleships - Live</title>
+    <title>Battleships - Distinction Edition</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
-        body { background: #121212; color: #00FF00; font-family: sans-serif; text-align: center; }
-        .grid { display: grid; grid-template-columns: repeat(5, 40px); gap: 5px; justify-content: center; margin: 20px; }
-        .cell { width: 40px; height: 40px; border: 1px solid #444; background: #222; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; }
-        .hit { background: #ff4444 !important; }
-        .miss { background: #4444ff !important; }
-        .player-ship { border: 2px solid #00FF00; }
+        body { background: #0f172a; color: #38bdf8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(5, 45px); gap: 8px; justify-content: center; margin: 20px auto; background: #1e293b; padding: 15px; border-radius: 8px; width: fit-content; }
+        .cell { width: 45px; height: 45px; border: 1px solid #334155; background: #0f172a; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; transition: 0.2s; }
+        .cell:hover { background: #1e293b; border-color: #38bdf8; }
+        .hit { background: #ef4444 !important; color: white; border-color: #7f1d1d; }
+        .miss { background: #334155 !important; color: #94a3b8; }
+        .player-ship { border: 2px solid #22c55e; color: #22c55e; }
+        #status { font-size: 1.2rem; margin: 20px; padding: 10px; border-radius: 5px; background: #1e293b; display: inline-block; min-width: 300px; }
     </style>
 </head>
 <body>
-    <h1>BATTLESHIPS: PLAYER VS COMPUTER</h1>
-    <div id="status">YOUR TURN: Click the bottom grid to bomb the computer!</div>
+    <h1>BATTLESHIPS: COMMAND CENTER</h1>
+    <div id="status">INITIALIZING SYSTEMS...</div>
     
-    <h3>Your Fleet (Top)</h3>
+    <h3>YOUR FLEET</h3>
     <div id="player-grid" class="grid"></div>
-    <h3>Computer's Ocean (Click to Attack)</h3>
+    
+    <h3>ENEMY WATERS (CLICK TO FIRE)</h3>
     <div id="cpu-grid" class="grid"></div>
 
     <script type="py">
 import random
 from pyscript import document
 
-# Game State
-size = 5
-player_ships = set([(0,0), (1,2), (3,4)]) # Your starting ships
-cpu_ships = set([(random.randint(0,4), random.randint(0,4)) for _ in range(3)])
+# Game Setup
+SIZE = 5
+p_ships = set([(0,1), (2,3), (4,0)]) # Pre-placed for immediate play
+c_ships = set([(random.randint(0,4), random.randint(0,4)) for _ in range(3)])
 
-def init_board():
-    p_grid = document.getElementById("player-grid")
-    c_grid = document.getElementById("cpu-grid")
+def setup_boards():
+    p_div = document.getElementById("player-grid")
+    c_div = document.getElementById("cpu-grid")
     
-    for r in range(size):
-        for c in range(size):
-            # Create Player Cell
+    for r in range(SIZE):
+        for c in range(SIZE):
+            # Player Board
             p_cell = document.createElement("div")
             p_cell.className = "cell"
+            if (r,c) in p_ships:
+                p_cell.classList.add("player-ship")
+                p_cell.innerText = "S"
+            else:
+                p_cell.innerText = "~"
             p_cell.id = f"p-{r}-{c}"
-            if (r,c) in player_ships: p_cell.classList.add("player-ship")
-            p_cell.innerText = "S" if (r,c) in player_ships else "~"
-            p_grid.appendChild(p_cell)
+            p_div.appendChild(p_cell)
             
-            # Create Clickable CPU Cell
+            # CPU Board (Interactive)
             c_cell = document.createElement("div")
             c_cell.className = "cell"
-            c_cell.id = f"c-{r}-{c}"
             c_cell.innerText = "?"
-            # This 'onclick' is what lets you drop the bomb
-            c_cell.onclick = lambda e, row=r, col=c: player_attack(row, col)
-            c_grid.appendChild(c_cell)
+            c_cell.id = f"c-{r}-{c}"
+            # Logic: Assign click event to run the attack
+            c_cell.onclick = lambda e, row=r, col=c: handle_click(row, col)
+            c_div.appendChild(c_cell)
+    
+    document.getElementById("status").innerText = "SYSTEMS ONLINE: Awaiting target coordinates..."
 
-def player_attack(r, c):
-    global cpu_ships
-    cell = document.getElementById(f"c-{r}-{c}")
+def handle_click(r, c):
+    global c_ships
+    target_id = f"c-{r}-{c}"
+    cell = document.getElementById(target_id)
     status = document.getElementById("status")
     
-    if (r, c) in cpu_ships:
+    if (r, c) in c_ships:
         cell.classList.add("hit")
-        cpu_ships.remove((r, c))
-        status.innerText = "HIT! You get another shot!"
-        if not cpu_ships: status.innerText = "VICTORY! ALL COMPUTER SHIPS SUNK!"
+        cell.innerText = "X"
+        c_ships.remove((r, c))
+        status.innerText = "DIRECT HIT! Intelligence suggests more targets nearby."
+        if not c_ships:
+            status.innerText = "VICTORY: ENEMY FLEET NEUTRALIZED!"
     else:
         cell.classList.add("miss")
-        status.innerText = "MISS! Computer's turn..."
-        computer_turn()
+        cell.innerText = "O"
+        status.innerText = "MISS. Enemy is counter-attacking..."
+        cpu_turn()
 
-def computer_turn():
-    r, c = random.randint(0,4), random.randint(0,4)
-    cell = document.getElementById(f"p-{r}-{c}")
-    if (r, c) in player_ships:
-        cell.classList.add("hit")
-        player_ships.remove((r,c))
+def cpu_turn():
+    r, c = random.randint(0, 4), random.randint(0, 4)
+    p_cell = document.getElementById(f"p-{r}-{c}")
+    if (r, c) in p_ships:
+        p_cell.classList.add("hit")
+        p_cell.innerText = "X"
     else:
-        cell.classList.add("miss")
+        p_cell.classList.add("miss")
+        p_cell.innerText = "O"
 
-init_board()
+setup_boards()
     </script>
 </body>
-</html>cccbeegfvicggbcceigbuhdrkvekfldtvnvblbhuvd
+</html>
