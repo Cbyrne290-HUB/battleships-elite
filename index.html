@@ -6,78 +6,82 @@
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
-        :root { --neon: #22c55e; --bg: #020617; }
+        :root { --neon: #22c55e; --bg: #020617; --steel: #1e293b; --danger: #ef4444; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; align-items: center; }
-        .hud { width: 1100px; margin: 20px; padding: 20px; background: #0f172a; border: 3px solid #1e293b; border-radius: 12px; position: relative; }
         
-        .main-layout { display: flex; justify-content: space-between; gap: 20px; }
-        
-        /* Ship Selection Area */
-        .ship-hangar { width: 220px; border-right: 1px solid #334155; padding-right: 15px; }
-        .ship-card { 
-            background: #1e293b; border: 2px solid var(--neon); margin-bottom: 10px; 
-            cursor: grab; padding: 10px; font-size: 11px; text-align: center;
+        .monitor-frame { 
+            width: 1150px; margin: 20px; padding: 20px; 
+            background: #0f172a; border: 8px solid var(--steel); 
+            border-radius: 20px; box-shadow: inset 0 0 50px #000, 0 0 30px rgba(0,0,0,0.8);
         }
-        .ship-card:active { cursor: grabbing; opacity: 0.5; }
 
-        /* Grids */
-        .grid { display: grid; grid-template-columns: 30px repeat(12, 32px); gap: 1px; background: var(--neon); }
-        .cell { width: 32px; height: 32px; background: var(--bg); position: relative; }
-        .label { background: #0f172a; color: var(--neon); display: flex; align-items: center; justify-content: center; font-size: 10px; }
-        
-        /* State Visuals */
-        .placed { background: #475569 !important; border: 1px solid #94a3b8; }
-        .hit { background: #ef4444 !important; animation: shake 0.2s infinite; }
-        .miss { background: #38bdf8 !important; opacity: 0.4; }
+        .layout { display: flex; justify-content: space-between; gap: 20px; }
 
-        /* Sunk / Win UI */
-        #win-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: none; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 1000;
+        /* Ship Hangar & Visuals */
+        .hangar { width: 230px; padding: 10px; border-right: 2px solid var(--steel); }
+        .ship-vessel { 
+            background: #475569; border: 2px solid var(--neon); margin: 10px 0;
+            cursor: grab; position: relative; display: flex; align-items: center; 
+            justify-content: center; transition: 0.3s; font-weight: bold; font-size: 10px;
         }
-        .sunk-msg { color: #ef4444; font-weight: bold; font-size: 12px; }
+        .ship-vessel:hover { background: var(--neon); color: black; }
+        .vertical { transform: rotate(90deg); margin: 40px 0; }
 
-        .btn { background: var(--neon); color: #000; border: none; padding: 10px; font-weight: bold; cursor: pointer; margin-top: 5px; width: 100%; }
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 100% { transform: translate(-1px, -1px); } }
+        /* Specific Vessel Shapes */
+        #s0 { width: 120px; height: 40px; clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 80%); } /* Carrier */
+        #s1 { width: 180px; height: 30px; border-radius: 50px 10px 10px 50px; } /* Dreadnought */
+        #s2 { width: 90px; height: 25px; border-radius: 20px; } /* Sub */
+        #s3, #s4 { width: 150px; height: 30px; clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%); } /* Battleships */
+
+        /* Closed Grid Styling */
+        .grid-wrapper { border: 4px solid var(--steel); background: var(--steel); padding: 2px; }
+        .grid { display: grid; grid-template-columns: 35px repeat(12, 35px); gap: 1px; }
+        .cell { width: 35px; height: 35px; background: var(--bg); position: relative; }
+        .label { background: #0f172a; color: var(--neon); font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* Effects */
+        .placed { background: #1e293b !important; border: 1px solid var(--neon); box-shadow: inset 0 0 10px var(--neon); }
+        .hit { background: var(--danger) !important; animation: explode 0.5s ease-out; }
+        .miss { background: #0ea5e9 !important; opacity: 0.4; }
+        .sunk-ship { filter: grayscale(1) brightness(0.5); border-color: var(--danger) !important; }
+        
+        @keyframes explode {
+            0% { transform: scale(1); background: white; }
+            50% { transform: scale(1.5); background: orange; }
+            100% { transform: scale(1); background: var(--danger); }
+        }
+
+        .btn { background: var(--neon); color: #000; border: none; padding: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .rotate-hint { font-size: 9px; color: #fb923c; margin-top: 2px; }
     </style>
 </head>
 <body>
 
-<div id="win-overlay">
-    <div style="border: 5px solid var(--neon); padding: 60px; text-align: center;">
-        <h1 style="font-size: 80px; margin: 0;">YOU WIN</h1>
-        <button onclick="location.reload()" class="btn" style="width: auto; padding: 10px 40px;">NEW MISSION</button>
-    </div>
-</div>
-
-<div class="hud">
-    <h2 style="text-align: center;">TACTICAL STRATEGY PANEL</h2>
-    <div id="status" style="text-align: center; color: #fb923c; margin-bottom: 15px;">DRAG SHIPS TO YOUR GRID</div>
-
-    <div class="main-layout">
-        <div class="ship-hangar">
-            <button id="rot-btn" class="btn" style="background: #f59e0b; margin-bottom: 15px;">ROTATE (HORIZ)</button>
-            <div class="ship-card" draggable="true" id="s0">CARRIER (4x2)</div>
-            <div class="ship-card" draggable="true" id="s1">DREADNOUGHT (6x1)</div>
-            <div class="ship-card" draggable="true" id="s2">SUBMARINE (3x1)</div>
-            <div class="ship-card" draggable="true" id="s3">BATTLESHIP A (5x1)</div>
-            <div class="ship-card" draggable="true" id="s4">BATTLESHIP B (5x1)</div>
+<div class="monitor-frame">
+    <h1 style="text-align: center; margin: 0 0 15px 0; letter-spacing: 4px;">STRATEGY PANEL: BATTLE READY</h1>
+    
+    <div class="layout">
+        <div class="hangar">
+            <p style="font-size: 11px;">DRAG TO GRID | RIGHT-CLICK TO ROTATE</p>
+            <div class="ship-vessel" draggable="true" id="s0" oncontextmenu="rotate_me(event, 0)">CARRIER</div>
+            <div class="ship-vessel" draggable="true" id="s1" oncontextmenu="rotate_me(event, 1)">DREADNOUGHT</div>
+            <div class="ship-vessel" draggable="true" id="s2" oncontextmenu="rotate_me(event, 2)">SUBMARINE</div>
+            <div class="ship-vessel" draggable="true" id="s3" oncontextmenu="rotate_me(event, 3)">BATTLESHIP A</div>
+            <div class="ship-vessel" draggable="true" id="s4" oncontextmenu="rotate_me(event, 4)">BATTLESHIP B</div>
             
-            <div style="margin-top: 20px; font-size: 12px;">
-                <p>ENEMY STATUS:</p>
-                <div id="e-status-list"></div>
+            <div id="fleet-comms" style="margin-top:20px; font-size: 12px; border: 1px solid var(--steel); padding: 5px;">
+                STATUS: WAITING FOR DEPLOYMENT...
             </div>
         </div>
 
-        <div>
+        <div class="grid-wrapper">
             <div id="p-grid" class="grid"></div>
-            <p style="text-align: center;">YOUR STRATEGY GRID</p>
+            <div style="background: var(--steel); text-align: center; font-size: 10px; padding: 5px;">TACTICAL STRATEGY GRID</div>
         </div>
 
-        <div id="enemy-radar-box" style="opacity: 0.2; pointer-events: none;">
+        <div id="enemy-radar" class="grid-wrapper" style="opacity: 0.1; pointer-events: none;">
             <div id="e-grid" class="grid"></div>
-            <p style="text-align: center;">ENEMY RADAR</p>
+            <div style="background: var(--steel); text-align: center; font-size: 10px; padding: 5px;">ENEMY RADAR ZONE</div>
         </div>
     </div>
 </div>
@@ -86,8 +90,7 @@
 from pyscript import document, window
 import random
 
-# Ship configurations as requested
-SHIP_TYPES = [
+FLEET_DATA = [
     {"id": 0, "name": "CARRIER", "size": (4, 2)},
     {"id": 1, "name": "DREADNOUGHT", "size": (6, 1)},
     {"id": 2, "name": "SUBMARINE", "size": (3, 1)},
@@ -96,125 +99,111 @@ SHIP_TYPES = [
 ]
 
 SIZE = 12
-p_fleet = []
-e_fleet = []
-is_horiz = True
-game_started = False
+player_ships, enemy_ships = [], []
+ship_rotations = [True, True, True, True, True] # True = Horizontal
 
-def init():
+def init_boards():
     for g_id in ["p-grid", "e-grid"]:
         grid = document.getElementById(g_id)
-        grid.appendChild(create_cell("", "label"))
-        for i in range(1, SIZE+1): grid.appendChild(create_cell(str(i), "label"))
+        grid.appendChild(create_sq("", "label"))
+        for i in range(1, SIZE+1): grid.appendChild(create_sq(str(i), "label"))
         for r in range(SIZE):
-            grid.appendChild(create_cell(chr(65+r), "label"))
+            grid.appendChild(create_sq(chr(65+r), "label"))
             for c in range(SIZE):
-                cell = create_cell("", "cell")
-                cell.id = f"{g_id[0]}-{r}-{c}"
+                sq = create_sq("", "cell")
+                sq.id = f"{g_id[0]}-{r}-{c}"
                 if g_id == "p-grid":
-                    cell.ondragover = lambda e: e.preventDefault()
-                    cell.ondrop = lambda e, row=r, col=c: handle_drop(e, row, col)
+                    sq.ondragover = lambda e: e.preventDefault()
+                    sq.ondrop = lambda e, row=r, col=c: drop_ship(e, row, col)
                 else:
-                    cell.onclick = lambda e, row=r, col=c: player_attack(row, col)
-                grid.appendChild(cell)
-    
-    # Pre-generate Enemy Fleet Status UI
-    list_ui = document.getElementById("e-status-list")
-    for s in SHIP_TYPES:
-        item = document.createElement("div")
-        item.id = f"estat-{s['id']}"
-        item.innerText = f"{s['name']}: OK"
-        list_ui.appendChild(item)
-    
-    setup_enemy()
+                    sq.onclick = lambda e, row=r, col=c: attack_enemy(row, col)
+                grid.appendChild(sq)
+    setup_cpu()
 
-def create_cell(t, cls):
-    c = document.createElement("div")
-    c.className = f"cell {cls}"
-    c.innerText = t
-    return c
+def create_sq(t, cls):
+    d = document.createElement("div")
+    d.className = f"cell {cls}"
+    d.innerText = t
+    return d
 
-def handle_drop(event, r, c):
+def drop_ship(event, r, c):
     s_id = int(event.dataTransfer.getData("text"))
-    spec = SHIP_TYPES[s_id]
-    w, h = spec["size"] if is_horiz else (spec["size"][1], spec["size"][0])
+    spec = FLEET_DATA[s_id]
+    is_h = ship_rotations[s_id]
+    w, h = spec["size"] if is_h else (spec["size"][1], spec["size"][0])
     
     if r + h <= SIZE and c + w <= SIZE:
         coords = set((r+i, c+j) for i in range(h) for j in range(w))
-        if any(coords & s["coords"] for s in p_fleet): return
+        if any(coords & s["coords"] for s in player_ships): return
         
         for pr, pc in coords:
             document.getElementById(f"p-{pr}-{pc}").classList.add("placed")
         
-        p_fleet.append({"name": spec["name"], "coords": coords, "hp": len(coords)})
-        document.getElementById(f"s{s_id}").style.display = "none"
+        player_ships.append({"name": spec["name"], "coords": coords, "hp": len(coords)})
+        document.getElementById(f"s{s_id}").style.visibility = "hidden"
         
-        if len(p_fleet) == 5:
-            global game_started
-            game_started = True
-            document.getElementById("enemy-radar-box").style.opacity = "1"
-            document.getElementById("enemy-radar-box").style.pointerEvents = "all"
-            document.getElementById("status").innerText = "ALL SHIPS DEPLOYED! ENGAGE ENEMY!"
+        if len(player_fleet_check()) == 5:
+            document.getElementById("enemy-radar").style.opacity = "1"
+            document.getElementById("enemy-radar").style.pointerEvents = "all"
+            document.getElementById("fleet-comms").innerText = "STATUS: ENGAGING ENEMY"
 
-def setup_enemy():
-    for spec in SHIP_TYPES:
+def player_fleet_check(): return player_ships
+
+def setup_cpu():
+    for spec in FLEET_DATA:
         placed = False
         while not placed:
-            r, c, rot = random.randint(0,11), random.randint(0,11), random.choice([True, False])
-            w, h = spec["size"] if rot else (spec["size"][1], spec["size"][0])
+            r, c, h_mode = random.randint(0,11), random.randint(0,11), random.choice([True, False])
+            w, h = spec["size"] if h_mode else (spec["size"][1], spec["size"][0])
             if r+h <= SIZE and c+w <= SIZE:
                 coords = set((r+i, c+j) for i in range(h) for j in range(w))
-                if not any(coords & s["coords"] for s in e_fleet):
-                    e_fleet.append({"id": spec["id"], "name": spec["name"], "coords": coords, "hp": len(coords)})
+                if not any(coords & s["coords"] for s in enemy_ships):
+                    enemy_ships.append({"name": spec["name"], "coords": coords, "hp": len(coords)})
                     placed = True
 
-def player_attack(r, c):
+def attack_enemy(r, c):
     cell = document.getElementById(f"e-{r}-{c}")
     if "hit" in cell.className or "miss" in cell.className: return
     
     hit = False
-    for s in e_fleet:
+    for s in enemy_ships:
         if (r, c) in s["coords"]:
             cell.classList.add("hit")
             s["hp"] -= 1
             hit = True
             if s["hp"] == 0:
-                document.getElementById(f"estat-{s['id']}").innerHTML = f"<span class='sunk-msg'>{s['name']}: SUNK</span>"
+                document.getElementById("fleet-comms").innerText = f"SYSTEM: ENEMY {s['name']} SUNK!"
             break
     if not hit: cell.classList.add("miss")
-    
-    # AI plays back
-    window.setTimeout(lambda: enemy_turn(), 400)
-    if all(s["hp"] == 0 for s in e_fleet):
-        document.getElementById("win-overlay").style.display = "flex"
+    window.setTimeout(lambda: cpu_turn(), 300)
 
-def enemy_turn():
-    target_found = False
-    while not target_found:
-        r, c = random.randint(0, 11), random.randint(0, 11)
-        cell = document.getElementById(f"p-{r}-{c}")
-        if "hit" not in cell.className and "miss" not in cell.className:
-            target_found = True
-            hit = False
-            for s in p_fleet:
-                if (r, c) in s["coords"]:
-                    cell.classList.add("hit")
-                    hit = True; break
-            if not hit: cell.classList.add("miss")
+def cpu_turn():
+    r, c = random.randint(0, 11), random.randint(0, 11)
+    cell = document.getElementById(f"p-{r}-{c}")
+    if "hit" in cell.className or "miss" in cell.className: return
+    hit = False
+    for s in player_ships:
+        if (r, c) in s["coords"]:
+            cell.classList.add("hit")
+            hit = True; break
+    if not hit: cell.classList.add("miss")
 
-def toggle_rot(e):
-    global is_horiz
-    is_horiz = not is_horiz
-    document.getElementById("rot-btn").innerText = f"ROTATE ({'HORIZ' if is_horiz else 'VERT'})"
+def rotate_me(event, s_id):
+    event.preventDefault()
+    ship_rotations[s_id] = not ship_rotations[s_id]
+    el = document.getElementById(f"s{s_id}")
+    if not ship_rotations[s_id]: el.classList.add("vertical")
+    else: el.classList.remove("vertical")
 
-def on_drag_start(event):
+def start_drag(event):
     event.dataTransfer.setData("text", event.target.id[1:])
 
-window.on_drag_start = on_drag_start
-for i in range(5): document.getElementById(f"s{i}").ondragstart = on_drag_start
-document.getElementById("rot-btn").onclick = toggle_rot
+window.start_drag = start_drag
+window.rotate_me = rotate_me
+for i in range(5):
+    document.getElementById(f"s{i}").ondragstart = start_drag
 
-init()
+init_boards()
 </script>
 </body>
 </html>
