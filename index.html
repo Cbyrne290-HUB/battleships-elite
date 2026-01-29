@@ -2,95 +2,82 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Battleship War: Tactical Command</title>
+    <title>Battleship War: Strategy Panel</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
-        :root { --neon: #22c55e; --bg: #020617; --hit: #ef4444; }
+        :root { --neon: #22c55e; --bg: #020617; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .hud { width: 1100px; margin: 20px; padding: 20px; background: #0f172a; border: 3px solid #1e293b; border-radius: 12px; position: relative; }
         
-        .hud { width: 1100px; margin: 20px; padding: 20px; background: #0f172a; border: 2px solid #1e293b; border-radius: 10px; position: relative; }
-        .main-layout { display: flex; justify-content: space-between; gap: 15px; }
-
-        /* SHIP VISUALS (Replacing boxes with silhouettes) */
-        .ship-hangar { width: 220px; display: flex; flex-direction: column; gap: 15px; }
-        .ship-img { 
-            background: #1e293b; border: 1px solid var(--neon); cursor: grab;
-            display: flex; align-items: center; justify-content: center; font-weight: bold;
-            text-shadow: 0 0 5px var(--neon); position: relative;
+        .main-layout { display: flex; justify-content: space-between; gap: 20px; }
+        
+        /* Ship Selection Area */
+        .ship-hangar { width: 220px; border-right: 1px solid #334155; padding-right: 15px; }
+        .ship-card { 
+            background: #1e293b; border: 2px solid var(--neon); margin-bottom: 10px; 
+            cursor: grab; padding: 10px; font-size: 11px; text-align: center;
         }
-        /* Visual shapes for ships */
-        #s0 { height: 60px; width: 120px; clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%); } /* Carrier */
-        #s1 { height: 32px; width: 190px; border-radius: 50% 50% 5px 5px; } /* Dreadnought */
-        #s2 { height: 25px; width: 90px; border-radius: 20px; } /* Submarine */
-        #s3 { height: 30px; width: 150px; clip-path: polygon(0 50%, 20% 0, 80% 0, 100% 50%, 80% 100%, 20% 100%); } /* Frigate */
+        .ship-card:active { cursor: grabbing; opacity: 0.5; }
 
         /* Grids */
-        .grid { display: grid; grid-template-columns: 30px repeat(12, 32px); gap: 1px; background: #334155; }
-        .cell { width: 32px; height: 32px; background: var(--bg); transition: 0.2s; position: relative; }
-        .label { color: var(--neon); font-size: 10px; display: flex; align-items: center; justify-content: center; background: #0f172a; }
+        .grid { display: grid; grid-template-columns: 30px repeat(12, 32px); gap: 1px; background: var(--neon); }
+        .cell { width: 32px; height: 32px; background: var(--bg); position: relative; }
+        .label { background: #0f172a; color: var(--neon); display: flex; align-items: center; justify-content: center; font-size: 10px; }
         
-        /* Combat Visuals */
-        .placed { background: #334155 !important; border: 1px solid var(--neon); }
-        .hit { background: var(--hit) !important; animation: blink 0.5s infinite; }
-        .miss { background: #38bdf8 !important; opacity: 0.3; }
-        .sunk-alert { color: var(--hit); font-weight: bold; font-size: 20px; animation: pop 1s ease-out forwards; }
+        /* State Visuals */
+        .placed { background: #475569 !important; border: 1px solid #94a3b8; }
+        .hit { background: #ef4444 !important; animation: shake 0.2s infinite; }
+        .miss { background: #38bdf8 !important; opacity: 0.4; }
 
-        /* Fleet Status Tracker (Left Side) */
-        .fleet-status { font-size: 12px; margin-top: 10px; }
-        .status-item { margin: 5px 0; display: flex; justify-content: space-between; padding: 2px 5px; border-bottom: 1px solid #1e293b; }
-        .is-sunk { color: var(--hit); text-decoration: line-through; }
-
-        /* Win Overlay */
+        /* Sunk / Win UI */
         #win-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; flex-direction: column;
+            background: rgba(0,0,0,0.95); display: none; flex-direction: column;
             align-items: center; justify-content: center; z-index: 1000;
         }
+        .sunk-msg { color: #ef4444; font-weight: bold; font-size: 12px; }
 
-        @keyframes blink { 50% { opacity: 0.5; } }
-        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1.5); opacity: 0; } }
+        .btn { background: var(--neon); color: #000; border: none; padding: 10px; font-weight: bold; cursor: pointer; margin-top: 5px; width: 100%; }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 100% { transform: translate(-1px, -1px); } }
     </style>
 </head>
 <body>
 
 <div id="win-overlay">
-    <div style="border: 4px solid var(--neon); padding: 50px; text-align: center; background: #000;">
-        <h1 style="font-size: 70px; margin: 0;">YOU WIN</h1>
-        <h2 id="final-score">SCORE: 1245</h2>
-        <button onclick="location.reload()" style="background: var(--neon); padding: 10px 20px; border: none; cursor: pointer;">RE-DEPLOY</button>
+    <div style="border: 5px solid var(--neon); padding: 60px; text-align: center;">
+        <h1 style="font-size: 80px; margin: 0;">YOU WIN</h1>
+        <button onclick="location.reload()" class="btn" style="width: auto; padding: 10px 40px;">NEW MISSION</button>
     </div>
 </div>
 
 <div class="hud">
-    <h2 style="text-align: center; margin: 0; letter-spacing: 3px;">TACTICAL COMMAND PANEL</h2>
-    <div id="status-bar" style="text-align: center; color: #fb923c; margin: 10px; height: 20px;">DEPLOY FLEET TO START</div>
+    <h2 style="text-align: center;">TACTICAL STRATEGY PANEL</h2>
+    <div id="status" style="text-align: center; color: #fb923c; margin-bottom: 15px;">DRAG SHIPS TO YOUR GRID</div>
 
     <div class="main-layout">
         <div class="ship-hangar">
-            <p style="font-size: 10px; color: #64748b;">AVAILABLE HANGAR</p>
-            <div class="ship-img" draggable="true" id="s0">CARRIER</div>
-            <div class="ship-img" draggable="true" id="s1">DREADNOUGHT</div>
-            <div class="ship-img" draggable="true" id="s2">SUB</div>
-            <div class="ship-img" draggable="true" id="s3">FRIGATE</div>
+            <button id="rot-btn" class="btn" style="background: #f59e0b; margin-bottom: 15px;">ROTATE (HORIZ)</button>
+            <div class="ship-card" draggable="true" id="s0">CARRIER (4x2)</div>
+            <div class="ship-card" draggable="true" id="s1">DREADNOUGHT (6x1)</div>
+            <div class="ship-card" draggable="true" id="s2">SUBMARINE (3x1)</div>
+            <div class="ship-card" draggable="true" id="s3">BATTLESHIP A (5x1)</div>
+            <div class="ship-card" draggable="true" id="s4">BATTLESHIP B (5x1)</div>
             
-            <div class="fleet-status" id="fleet-ui">
-                <p>ENEMY FLEET STATUS</p>
-                <div id="stat-0" class="status-item">CARRIER <span>ACTIVE</span></div>
-                <div id="stat-1" class="status-item">DREADNOUGHT <span>ACTIVE</span></div>
-                <div id="stat-2" class="status-item">SUBMARINE <span>ACTIVE</span></div>
-                <div id="stat-3" class="status-item">FRIGATE <span>ACTIVE</span></div>
+            <div style="margin-top: 20px; font-size: 12px;">
+                <p>ENEMY STATUS:</p>
+                <div id="e-status-list"></div>
             </div>
         </div>
 
         <div>
             <div id="p-grid" class="grid"></div>
-            <p style="text-align: center; font-size: 10px;">STRATEGY GRID</p>
+            <p style="text-align: center;">YOUR STRATEGY GRID</p>
         </div>
 
-        <div id="enemy-radar" style="opacity: 0.3; pointer-events: none;">
+        <div id="enemy-radar-box" style="opacity: 0.2; pointer-events: none;">
             <div id="e-grid" class="grid"></div>
-            <p style="text-align: center; font-size: 10px;">ENEMY RADAR</p>
+            <p style="text-align: center;">ENEMY RADAR</p>
         </div>
     </div>
 </div>
@@ -99,15 +86,20 @@
 from pyscript import document, window
 import random
 
-SHIP_SPECS = [
+# Ship configurations as requested
+SHIP_TYPES = [
     {"id": 0, "name": "CARRIER", "size": (4, 2)},
     {"id": 1, "name": "DREADNOUGHT", "size": (6, 1)},
     {"id": 2, "name": "SUBMARINE", "size": (3, 1)},
-    {"id": 3, "name": "FRIGATE", "size": (5, 1)}
+    {"id": 3, "name": "BATTLESHIP A", "size": (5, 1)},
+    {"id": 4, "name": "BATTLESHIP B", "size": (5, 1)}
 ]
+
 SIZE = 12
-player_fleet, enemy_fleet = [], []
-turn_active = False
+p_fleet = []
+e_fleet = []
+is_horiz = True
+game_started = False
 
 def init():
     for g_id in ["p-grid", "e-grid"]:
@@ -125,6 +117,15 @@ def init():
                 else:
                     cell.onclick = lambda e, row=r, col=c: player_attack(row, col)
                 grid.appendChild(cell)
+    
+    # Pre-generate Enemy Fleet Status UI
+    list_ui = document.getElementById("e-status-list")
+    for s in SHIP_TYPES:
+        item = document.createElement("div")
+        item.id = f"estat-{s['id']}"
+        item.innerText = f"{s['name']}: OK"
+        list_ui.appendChild(item)
+    
     setup_enemy()
 
 def create_cell(t, cls):
@@ -135,78 +136,83 @@ def create_cell(t, cls):
 
 def handle_drop(event, r, c):
     s_id = int(event.dataTransfer.getData("text"))
-    spec = SHIP_SPECS[s_id]
-    w, h = spec["size"]
+    spec = SHIP_TYPES[s_id]
+    w, h = spec["size"] if is_horiz else (spec["size"][1], spec["size"][0])
+    
     if r + h <= SIZE and c + w <= SIZE:
         coords = set((r+i, c+j) for i in range(h) for j in range(w))
-        if any(coords & s["coords"] for s in player_fleet): return
-        for pr, pc in coords: document.getElementById(f"p-{pr}-{pc}").classList.add("placed")
-        player_fleet.append({"name": spec["name"], "coords": coords, "hp": len(coords)})
-        document.getElementById(f"s{s_id}").style.opacity = "0.1"
-        if len(player_fleet) == len(SHIP_SPECS):
-            global turn_active
-            turn_active = True
-            document.getElementById("enemy-radar").style.opacity = "1"
-            document.getElementById("enemy-radar").style.pointerEvents = "all"
-            document.getElementById("status-bar").innerText = "ALL SHIPS DEPLOYED. COMMENCE FIRE!"
+        if any(coords & s["coords"] for s in p_fleet): return
+        
+        for pr, pc in coords:
+            document.getElementById(f"p-{pr}-{pc}").classList.add("placed")
+        
+        p_fleet.append({"name": spec["name"], "coords": coords, "hp": len(coords)})
+        document.getElementById(f"s{s_id}").style.display = "none"
+        
+        if len(p_fleet) == 5:
+            global game_started
+            game_started = True
+            document.getElementById("enemy-radar-box").style.opacity = "1"
+            document.getElementById("enemy-radar-box").style.pointerEvents = "all"
+            document.getElementById("status").innerText = "ALL SHIPS DEPLOYED! ENGAGE ENEMY!"
 
 def setup_enemy():
-    for spec in SHIP_SPECS:
+    for spec in SHIP_TYPES:
         placed = False
         while not placed:
-            r, c = random.randint(0, SIZE-1), random.randint(0, SIZE-1)
-            w, h = spec["size"]
+            r, c, rot = random.randint(0,11), random.randint(0,11), random.choice([True, False])
+            w, h = spec["size"] if rot else (spec["size"][1], spec["size"][0])
             if r+h <= SIZE and c+w <= SIZE:
                 coords = set((r+i, c+j) for i in range(h) for j in range(w))
-                if not any(coords & s["coords"] for s in enemy_fleet):
-                    enemy_fleet.append({"id": spec["id"], "name": spec["name"], "coords": coords, "hp": len(coords)})
+                if not any(coords & s["coords"] for s in e_fleet):
+                    e_fleet.append({"id": spec["id"], "name": spec["name"], "coords": coords, "hp": len(coords)})
                     placed = True
 
 def player_attack(r, c):
-    global turn_active
-    if not turn_active: return
     cell = document.getElementById(f"e-{r}-{c}")
     if "hit" in cell.className or "miss" in cell.className: return
     
     hit = False
-    for ship in enemy_fleet:
-        if (r, c) in ship["coords"]:
+    for s in e_fleet:
+        if (r, c) in s["coords"]:
             cell.classList.add("hit")
-            ship["hp"] -= 1
+            s["hp"] -= 1
             hit = True
-            if ship["hp"] == 0:
-                document.getElementById(f"stat-{ship['id']}").innerHTML = f"{ship['name']} <span class='is-sunk'>SUNK</span>"
-                document.getElementById("status-bar").innerText = f"DIRECT HIT! ENEMY {ship['name']} SUNK!"
-            check_win()
+            if s["hp"] == 0:
+                document.getElementById(f"estat-{s['id']}").innerHTML = f"<span class='sunk-msg'>{s['name']}: SUNK</span>"
             break
     if not hit: cell.classList.add("miss")
     
-    # Computer plays back immediately
-    window.setTimeout(lambda: enemy_counter_attack(), 500)
+    # AI plays back
+    window.setTimeout(lambda: enemy_turn(), 400)
+    if all(s["hp"] == 0 for s in e_fleet):
+        document.getElementById("win-overlay").style.display = "flex"
 
-def enemy_counter_attack():
-    valid = False
-    while not valid:
-        r, c = random.randint(0, SIZE-1), random.randint(0, SIZE-1)
+def enemy_turn():
+    target_found = False
+    while not target_found:
+        r, c = random.randint(0, 11), random.randint(0, 11)
         cell = document.getElementById(f"p-{r}-{c}")
         if "hit" not in cell.className and "miss" not in cell.className:
-            valid = True
+            target_found = True
             hit = False
-            for ship in player_fleet:
-                if (r, c) in ship["coords"]:
+            for s in p_fleet:
+                if (r, c) in s["coords"]:
                     cell.classList.add("hit")
                     hit = True; break
             if not hit: cell.classList.add("miss")
 
-def check_win():
-    if all(s["hp"] == 0 for s in enemy_fleet):
-        document.getElementById("win-overlay").style.display = "flex"
+def toggle_rot(e):
+    global is_horiz
+    is_horiz = not is_horiz
+    document.getElementById("rot-btn").innerText = f"ROTATE ({'HORIZ' if is_horiz else 'VERT'})"
 
 def on_drag_start(event):
     event.dataTransfer.setData("text", event.target.id[1:])
 
 window.on_drag_start = on_drag_start
-for i in range(4): document.getElementById(f"s{i}").ondragstart = on_drag_start
+for i in range(5): document.getElementById(f"s{i}").ondragstart = on_drag_start
+document.getElementById("rot-btn").onclick = toggle_rot
 
 init()
 </script>
