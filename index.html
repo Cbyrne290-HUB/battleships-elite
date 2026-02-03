@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BATTLESHIPS</title>
     <link rel="stylesheet" href="static/style.css">
 </head>
 <body id="game-body">
+    
     <div class="top-bar">
         <button class="help-btn" onclick="toggleHelp(true)">HOW TO PLAY</button>
-        <button id="mute-btn" class="audio-ctrl" onclick="toggleMusic()">MUSIC: OFF</button>
+        <button id="mute-btn" class="audio-ctrl" onclick="toggleMusic()">🎵 MUSIC: OFF</button>
     </div>
 
     <h1 class="main-title">BATTLESHIPS</h1>
@@ -19,40 +20,60 @@
     <div class="game-layout">
         
         <div id="sidebar" class="controls">
-            <button class="ship-btn" id="btn-c" onclick="pickShip(5, 'btn-c', 'Carrier')">Carrier (5)</button>
-            <button class="ship-btn" id="btn-b" onclick="pickShip(4, 'btn-b', 'Battleship')">Battleship (4)</button>
-            <button class="ship-btn" id="btn-s" onclick="pickShip(3, 'btn-s', 'Submarine')">Submarine (3)</button>
-            <button class="ship-btn" id="btn-d" onclick="pickShip(3, 'btn-d', 'Destroyer')">Destroyer (3)</button>
-            <button class="ship-btn" id="btn-p" onclick="pickShip(2, 'btn-p', 'Patrol')">Patrol Boat (2)</button>
+            <button class="ship-btn" id="btn-Carrier" onclick="pickShip(5, 'Carrier')">Carrier (5)</button>
+            <button class="ship-btn" id="btn-Battleship" onclick="pickShip(4, 'Battleship')">Battleship (4)</button>
+            <button class="ship-btn" id="btn-Submarine" onclick="pickShip(3, 'Submarine')">Submarine (3)</button>
+            <button class="ship-btn" id="btn-Destroyer" onclick="pickShip(3, 'Destroyer')">Destroyer (3)</button>
+            <button class="ship-btn" id="btn-Patrol" onclick="pickShip(2, 'Patrol')">Patrol Boat (2)</button>
             <button class="ship-btn rotate-btn" onclick="rotate()">ROTATE SHIP</button>
             <button id="start-btn" class="ship-btn" style="background: var(--accent); text-align: center;" onclick="lockIn()">ENGAGE ENEMY</button>
         </div>
 
-        <div class="grid-container">
-            <div id="player-grid" class="grid"></div>
+        <div class="grid-wrapper">
+            <div class="grid-label">FRIENDLY WATERS</div>
+            <div class="grid-container">
+                <div id="player-grid" class="grid"></div>
+            </div>
         </div>
 
-        <div id="enemy-section" class="grid-container hidden-section">
-            <div id="enemy-grid" class="grid"></div>
+        <div id="enemy-section" class="grid-wrapper hidden-section">
+            <div class="grid-label" style="color:var(--enemy)">HOSTILE WATERS</div>
+            <div class="grid-container">
+                <div id="enemy-grid" class="grid"></div>
+            </div>
         </div>
     </div>
 
     <div class="status-area">
         <div class="ship-box">
             <h3>MY FLEET</h3>
-            <div id="p-track-Carrier" class="status-indicator">Carrier</div>
-            <div id="p-track-Battleship" class="status-indicator">Battleship</div>
-            <div id="p-track-Submarine" class="status-indicator">Submarine</div>
-            <div id="p-track-Destroyer" class="status-indicator">Destroyer</div>
-            <div id="p-track-Patrol" class="status-indicator">Patrol Boat</div>
+            <div id="p-stat-Carrier" class="status-indicator">Carrier</div>
+            <div id="p-stat-Battleship" class="status-indicator">Battleship</div>
+            <div id="p-stat-Submarine" class="status-indicator">Submarine</div>
+            <div id="p-stat-Destroyer" class="status-indicator">Destroyer</div>
+            <div id="p-stat-Patrol" class="status-indicator">Patrol Boat</div>
         </div>
         <div class="ship-box">
             <h3>ENEMY FLEET</h3>
-            <div id="e-track-Carrier" class="status-indicator">Carrier</div>
-            <div id="e-track-Battleship" class="status-indicator">Battleship</div>
-            <div id="e-track-Submarine" class="status-indicator">Submarine</div>
-            <div id="e-track-Destroyer" class="status-indicator">Destroyer</div>
-            <div id="e-track-Patrol" class="status-indicator">Patrol Boat</div>
+            <div id="e-stat-Carrier" class="status-indicator">Carrier</div>
+            <div id="e-stat-Battleship" class="status-indicator">Battleship</div>
+            <div id="e-stat-Submarine" class="status-indicator">Submarine</div>
+            <div id="e-stat-Destroyer" class="status-indicator">Destroyer</div>
+            <div id="e-stat-Patrol" class="status-indicator">Patrol Boat</div>
+        </div>
+    </div>
+
+    <div id="help-modal" class="overlay">
+        <div class="modal-content">
+            <h2>MISSION BRIEFING</h2>
+            <ul style="text-align: left; margin: 20px 0; color: #cbd5e1;">
+                <li>Deploy your 5 ships by clicking on the grid.</li>
+                <li>Press <strong>ROTATE</strong> to change orientation.</li>
+                <li>Once deployed, click <strong>ENGAGE ENEMY</strong>.</li>
+                <li>Take turns firing at the Enemy Grid.</li>
+                <li>First to sink all opposing ships wins.</li>
+            </ul>
+            <button class="ship-btn" onclick="toggleHelp(false)">UNDERSTOOD</button>
         </div>
     </div>
 
@@ -62,7 +83,10 @@
             <button class="ship-btn rotate-btn" onclick="location.reload()">REDEPLOY</button>
         </div>
     </div>
-    <audio id="bg-music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+
+    <audio id="bg-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/03/09/audio_c8c8a73467.mp3?filename=cinematic-atmosphere-score-1-20920.mp3" type="audio/mpeg">
+    </audio>
     
     <script src="static/script.js"></script>
 </body>

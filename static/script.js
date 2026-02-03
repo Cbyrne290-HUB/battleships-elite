@@ -1,101 +1,246 @@
-/* Battleship Elite - Logic Refactor */
-const pGrid = document.getElementById('player-grid'), 
-      eGrid = document.getElementById('enemy-grid'),
-      statusText = document.getElementById('status-text'),
-      startBtn = document.getElementById('start-btn'),
-      turnDisp = document.getElementById('turn-count');
+/* Battleships - Final Distinction Logic */
+const pGrid = document.getElementById('player-grid');
+const eGrid = document.getElementById('enemy-grid');
+const statusText = document.getElementById('status-text');
+const startBtn = document.getElementById('start-btn');
+const bgMusic = document.getElementById('bg-music');
+const muteBtn = document.getElementById('mute-btn');
 
-let horizontal = true, currentSize = 0, currentBtnId = null, currentShipName = '', 
-    placedCount = 0, isTurn = false, turns = 0;
-let pShips = {}, eShips = {}, pShipCoords = [], eShipCoords = [];
+// Game State
+let horizontal = true;
+let currentShip = null; 
+let placedCount = 0;
+let isTurn = false;
+let gameActive = false;
+let turns = 0;
+
+// Data Models for Sinking Logic
+// Maps cell Index -> Ship Name (e.g., 42: "Carrier")
+let pShipMap = {}; 
+let eShipMap = {}; 
+
+// Maps Ship Name -> Remaining Health
+let pFleetHealth = { 'Carrier': 5, 'Battleship': 4, 'Submarine': 3, 'Destroyer': 3, 'Patrol': 2 };
+let eFleetHealth = { 'Carrier': 5, 'Battleship': 4, 'Submarine': 3, 'Destroyer': 3, 'Patrol': 2 };
+
+// Arrays to track hit coordinates to prevent duplicates
+let pShots = [];
+let eShots = [];
 
 function init() {
-    for(let i=0; i<100; i++){
-        let pCell = document.createElement('div'); pCell.className = 'cell';
-        pCell.onmouseover = () => { if(currentSize) showPreview(i); };
-        pCell.onclick = () => placeShip(i);
-        pGrid.appendChild(pCell);
+    createGrid(pGrid, 'p');
+    createGrid(eGrid, 'e');
+}
 
-        let eCell = document.createElement('div'); eCell.className = 'cell';
-        eCell.onclick = () => playerAttack(i); 
-        eGrid.appendChild(eCell);
+function createGrid(gridEl, type) {
+    for(let i=0; i<100; i++) {
+        let cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.idx = i;
+        if(type === 'p') {
+            cell.onmouseover = () => previewShip(i);
+            cell.onclick = () => placeShip(i);
+        } else {
+            cell.onclick = () => playerAttack(i);
+        }
+        gridEl.appendChild(cell);
     }
 }
 
-function showPreview(idx) {
+// --- SETUP PHASE ---
+function pickShip(size, name) {
+    // Hide the button for the ship we just picked
+    if(pFleetHealth[name] === 0) return; // Already placed check
+    currentShip = { size: size, name: name };
+    // Highlight active button logic could go here
+}
+
+function rotate() { horizontal = !horizontal; }
+
+function previewShip(idx) {
+    if(!currentShip) return;
     Array.from(pGrid.children).forEach(c => c.classList.remove('preview'));
-    const path = getPath(idx, currentSize);
+    const path = getPath(idx, currentShip.size);
     if(path) path.forEach(i => pGrid.children[i].classList.add('preview'));
 }
 
 function getPath(idx, size) {
     let path = [];
-    for(let i=0; i<size; i++){
+    let row = Math.floor(idx / 10);
+    for(let i=0; i<size; i++) {
         let n = horizontal ? idx + i : idx + (i*10);
-        if(n > 99 || (horizontal && Math.floor(n/10) !== Math.floor(idx/10))) return null;
+        // Boundary Checks
+        if(n > 99) return null;
+        if(horizontal && Math.floor(n/10) !== row) return null;
+        // Collision Check
+        if(pShipMap[n]) return null;
         path.push(n);
     }
     return path;
 }
 
 function placeShip(idx) {
-    if(!currentSize) return;
-    const path = getPath(idx, currentSize);
-    if(!path || path.some(p => pShipCoords.includes(p))) return;
+    if(!currentShip) return;
+    const path = getPath(idx, currentShip.size);
     
-    pShipCoords.push(...path);
-    path.forEach(i => pGrid.children[i].classList.add('ship'));
-    document.getElementById(currentBtnId).style.display = 'none';
-    currentSize = 0; placedCount++;
-    if(placedCount === 5) startBtn.style.display = 'block';
+    if(path) {
+        path.forEach(i => {
+            pGrid.children[i].classList.add('ship');
+            pShipMap[i] = currentShip.name; // Map index to Name
+        });
+        
+        // Hide button
+        document.getElementById('btn-' + currentShip.name).style.display = 'none';
+        
+        placedCount++;
+        currentShip = null;
+        
+        if(placedCount === 5) {
+            statusText.innerText = "FLEET READY. AWAITING ORDERS.";
+            startBtn.style.display = 'block';
+        }
+    }
 }
 
+// --- GAME LOGIC ---
 function lockIn() {
     document.getElementById('sidebar').style.display = 'none';
     document.getElementById('enemy-section').classList.remove('hidden-section');
-    document.getElementById('enemy-section').style.opacity = '1';
-    generateEnemy(); isTurn = true; 
-    statusText.innerText = "COMMANDER, ENGAGE THE ENEMY";
+    document.getElementById('enemy-section').style.display = 'flex'; // Ensure flex for alignment
+    generateEnemyFleet();
+    gameActive = true;
+    isTurn = true;
+    statusText.innerText = "COMMANDER, FIRE AT WILL!";
 }
 
-function generateEnemy() {
-    const ships = [{n:'Carrier', s:5}, {n:'Battleship', s:4}, {n:'Submarine', s:3}, {n:'Destroyer', s:3}, {n:'Patrol', s:2}];
+function generateEnemyFleet() {
+    const ships = [
+        {n:'Carrier', s:5}, {n:'Battleship', s:4}, {n:'Submarine', s:3}, {n:'Destroyer', s:3}, {n:'Patrol', s:2}
+    ];
+    
     ships.forEach(sh => {
         let placed = false;
         while(!placed) {
-            let h = Math.random() > 0.5, start = Math.floor(Math.random()*100), path = [];
-            for(let i=0; i<sh.s; i++){
-                let n = h ? start + i : start + (i*10);
-                if(n < 100 && (!h || Math.floor(n/10) === Math.floor(start/10)) && !eShipCoords.includes(n)) path.push(n);
+            let h = Math.random() > 0.5;
+            let idx = Math.floor(Math.random() * 100);
+            let path = [];
+            let valid = true;
+            let row = Math.floor(idx / 10);
+
+            for(let i=0; i<sh.s; i++) {
+                let n = h ? idx + i : idx + (i*10);
+                if(n > 99 || (h && Math.floor(n/10) !== row) || eShipMap[n]) {
+                    valid = false; break;
+                }
+                path.push(n);
             }
-            if(path.length === sh.s) { eShips[sh.n] = path; eShipCoords.push(...path); placed = true; }
+
+            if(valid) {
+                path.forEach(i => eShipMap[i] = sh.n);
+                placed = true;
+            }
         }
     });
 }
 
-function playerAttack(i) {
-    if(!isTurn || eGrid.children[i].classList.contains('hit') || eGrid.children[i].classList.contains('miss')) return;
-    turns++; turnDisp.innerText = turns;
-    let hit = eShipCoords.includes(i);
-    eGrid.children[i].classList.add(hit ? 'hit' : 'miss');
-    if(hit) {
-        eShipCoords = eShipCoords.filter(c => c !== i);
-        if(eShipCoords.length === 0) return end("VICTORY");
+function playerAttack(idx) {
+    if(!gameActive || !isTurn || eShots.includes(idx)) return;
+    
+    eShots.push(idx);
+    turns++;
+    document.getElementById('turn-count').innerText = turns;
+
+    const cell = eGrid.children[idx];
+    const shipName = eShipMap[idx];
+
+    if(shipName) {
+        // HIT
+        cell.classList.add('hit');
+        triggerShake(); // Screen Shake
+        statusText.innerText = "DIRECT HIT!";
+        statusText.style.color = "#ef4444";
+        
+        eFleetHealth[shipName]--;
+        if(eFleetHealth[shipName] === 0) {
+            statusText.innerText = "ENEMY " + shipName.toUpperCase() + " SUNK!";
+            document.getElementById('e-stat-' + shipName).classList.add('sunk');
+            checkWin();
+        }
+    } else {
+        // MISS
+        cell.classList.add('miss');
+        statusText.innerText = "MISSED!";
+        statusText.style.color = "white";
     }
-    isTurn = false; setTimeout(aiMove, 600);
+
+    isTurn = false;
+    setTimeout(aiTurn, 800);
 }
 
-function aiMove() {
-    let r;
-    do { r = Math.floor(Math.random()*100); } while(pGrid.children[r].classList.contains('hit') || pGrid.children[r].classList.contains('miss'));
-    let hit = pShipCoords.includes(r);
-    pGrid.children[r].classList.add(hit ? 'hit' : 'miss');
-    if(pShipCoords.filter(c => !pGrid.children[c].classList.contains('hit')).length === 0) return end("DEFEAT");
+function aiTurn() {
+    if(!gameActive) return;
+    
+    let idx;
+    do { idx = Math.floor(Math.random()*100); } while(pShots.includes(idx));
+    
+    pShots.push(idx);
+    const cell = pGrid.children[idx];
+    const shipName = pShipMap[idx];
+
+    if(shipName) {
+        cell.classList.add('hit');
+        triggerShake(); // Screen Shake on taking damage
+        pFleetHealth[shipName]--;
+        
+        if(pFleetHealth[shipName] === 0) {
+            document.getElementById('p-stat-' + shipName).classList.add('sunk');
+            checkLoss();
+        }
+    } else {
+        cell.classList.add('miss');
+    }
+    
     isTurn = true;
+    statusText.innerText = "PLAYER TURN";
+    statusText.style.color = "#10b981";
 }
 
-function end(m) { document.getElementById('win-modal').style.display = 'flex'; document.getElementById('winner-msg').innerText = m; }
-function rotate() { horizontal = !horizontal; }
-function pickShip(s, id, n) { currentSize = s; currentBtnId = id; currentShipName = n; }
+// --- UTILS & FX ---
+function triggerShake() {
+    document.body.classList.add('shake-screen');
+    setTimeout(() => document.body.classList.remove('shake-screen'), 500);
+}
+
+function checkWin() {
+    if(Object.values(eFleetHealth).every(h => h === 0)) endGame("VICTORY - ENEMY ELIMINATED");
+}
+
+function checkLoss() {
+    if(Object.values(pFleetHealth).every(h => h === 0)) endGame("DEFEAT - FLEET DESTROYED");
+}
+
+function endGame(msg) {
+    gameActive = false;
+    document.getElementById('win-modal').style.display = 'flex';
+    document.getElementById('winner-msg').innerText = msg;
+}
+
+// --- UI CONTROLS ---
+function toggleHelp(show) {
+    document.getElementById('help-modal').style.display = show ? 'flex' : 'none';
+}
+
+function toggleMusic() {
+    if(bgMusic.paused) {
+        bgMusic.play().then(() => {
+            muteBtn.innerText = "🎵 MUSIC: ON";
+            muteBtn.style.background = "#10b981";
+        }).catch(e => alert("Please interact with the page first!"));
+    } else {
+        bgMusic.pause();
+        muteBtn.innerText = "🎵 MUSIC: OFF";
+        muteBtn.style.background = "#334155";
+    }
+}
 
 init();
