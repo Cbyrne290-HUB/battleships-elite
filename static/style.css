@@ -1,43 +1,186 @@
 :root { 
-    --bg: #0b1121; --panel: #161f33; --player: #3b82f6; 
-    --enemy: #ef4444; --accent: #10b981; --border: #2e3c5a;
+    --bg: #0b1121; 
+    --panel: #161f33; 
+    --player: #3b82f6; 
+    --enemy: #ef4444; 
+    --accent: #10b981; 
+    --border: #2e3c5a;
+    --text-muted: #94a3b8;
 }
-body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding-bottom: 50px; }
 
+body { 
+    background: var(--bg); 
+    color: white; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    margin: 0; 
+    min-height: 100vh;
+}
+
+/* --- HEADER & TITLES --- */
 .main-title { 
-    font-size: 4rem; font-weight: 800; text-transform: uppercase; 
-    letter-spacing: 10px; margin: 30px 0 10px; color: #fff;
-    text-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+    font-size: 3.5rem; 
+    font-weight: 800; 
+    letter-spacing: 5px; 
+    margin-top: 30px; 
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
 }
 
-.top-bar { width: 90%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.stats-bar { font-size: 1.2rem; color: var(--accent); font-weight: bold; }
+.top-bar {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    box-sizing: border-box;
+}
 
-.game-layout { display: flex; gap: 30px; align-items: flex-start; justify-content: center; }
+.help-btn, .audio-ctrl {
+    background: #334155;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
 
+.stats-bar {
+    color: var(--accent);
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.deployment-msg {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+/* --- MAIN LAYOUT (The Grid System) --- */
+.game-layout { 
+    display: flex; 
+    gap: 40px; 
+    align-items: flex-start; 
+    justify-content: center; 
+    margin-top: 10px;
+}
+
+/* Sidebar Styling (Forces Vertical Buttons) */
+.controls { 
+    background: var(--panel); 
+    padding: 20px; 
+    border-radius: 12px; 
+    width: 200px; 
+    border: 1px solid var(--border);
+    display: flex;           /* CRITICAL FIX */
+    flex-direction: column;  /* CRITICAL FIX: Stacks buttons vertical */
+    gap: 10px;               /* Adds space between buttons */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.ship-btn { 
+    padding: 12px; 
+    background: #334155; 
+    border: none; 
+    color: white; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-weight: 600; 
+    transition: all 0.2s;
+    text-align: left;
+}
+.ship-btn:hover { background: #475569; }
+
+.rotate-btn { 
+    background: var(--player); 
+    text-align: center; 
+    margin-top: 10px; 
+}
+.rotate-btn:hover { background: #2563eb; }
+
+#start-btn { 
+    background: var(--accent); 
+    text-align: center;
+    display: none; /* Hidden until ships placed */
+}
+
+/* --- GAME GRIDS --- */
 .grid-container { 
-    border: 2px solid var(--border); padding: 10px; 
-    background: #000; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    padding: 10px; 
+    background: #020617; 
+    border-radius: 8px; 
+    border: 2px solid var(--border);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
 }
 
-.grid { display: grid; grid-template-columns: repeat(10, 35px); grid-template-rows: repeat(10, 35px); gap: 1px; }
+.grid { 
+    display: grid; 
+    grid-template-columns: repeat(10, 32px); 
+    grid-template-rows: repeat(10, 32px); 
+    gap: 2px; 
+}
 
-.cell { width: 35px; height: 35px; background: #1a263e; border: 1px solid #0b1121; cursor: pointer; }
+.cell { 
+    width: 32px; 
+    height: 32px; 
+    background: #0f172a; 
+    cursor: pointer; 
+    transition: background 0.2s;
+}
+
 .cell.preview { background: rgba(59, 130, 246, 0.5); }
-.cell.ship { background: var(--player); box-shadow: inset 0 0 10px rgba(255,255,255,0.2); }
-.cell.hit { background: var(--enemy); animation: hitPulse 0.4s ease; }
-.cell.miss { background: #2d3e5d; }
+.cell.ship { background: var(--player); border: 1px solid rgba(255,255,255,0.1); }
+.cell.hit { background: var(--enemy); animation: pop 0.3s; }
+.cell.miss { background: #334155; }
+.cell.miss::after { content: "•"; color: #94a3b8; display: flex; justify-content: center; align-items: center; height: 100%; }
 
-.controls { background: var(--panel); padding: 20px; border-radius: 8px; width: 200px; }
-.ship-btn { width: 100%; margin: 5px 0; padding: 10px; background: #2d3e5d; border: none; color: white; cursor: pointer; font-weight: bold; border-radius: 4px; }
-.rotate-btn { background: var(--player); margin-top: 15px; }
-#start-btn { background: var(--accent); display: none; margin-top: 10px; }
+/* --- BOTTOM STATUS CARDS --- */
+.status-area { 
+    display: flex; 
+    gap: 40px; 
+    margin-top: 30px; 
+}
 
-.status-area { display: flex; gap: 20px; margin-top: 30px; }
-.ship-box { background: var(--panel); padding: 15px; border-radius: 8px; width: 160px; }
-.status-indicator { font-size: 0.8rem; margin: 4px 0; padding: 5px; background: #1f2a44; border-radius: 3px; }
+.ship-box { 
+    background: var(--panel); 
+    padding: 20px; 
+    border-radius: 12px; 
+    width: 180px; 
+    border: 1px solid var(--border);
+}
 
-.hidden-section { opacity: 0; pointer-events: none; transition: opacity 0.5s; }
-.overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100; }
+.ship-box h3 {
+    margin: 0 0 15px 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
 
-@keyframes hitPulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+.status-indicator { 
+    font-size: 0.85rem; 
+    padding: 8px; 
+    margin-bottom: 4px;
+    background: #1e293b;
+    border-radius: 4px;
+    color: #e2e8f0;
+}
+
+.status-indicator.sunk {
+    text-decoration: line-through;
+    color: var(--enemy);
+    opacity: 0.7;
+}
+
+/* --- UTILS --- */
+.hidden-section { opacity: 0; pointer-events: none; }
+.overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 50; }
+.modal-content { background: var(--panel); padding: 40px; border-radius: 16px; text-align: center; border: 2px solid var(--accent); }
+
+@keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }

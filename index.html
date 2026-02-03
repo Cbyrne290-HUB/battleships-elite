@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BATTLESHIP ELITE</title>
+    <title>BATTLESHIPS</title>
     <link rel="stylesheet" href="static/style.css">
 </head>
 <body id="game-body">
-    <h1 class="main-title">Battleships</h1>
-    
     <div class="top-bar">
         <button class="help-btn" onclick="toggleHelp(true)">HOW TO PLAY</button>
-        <div class="stats-bar">TURNS: <span id="turn-count">0</span></div>
-        <button id="mute-btn" class="audio-ctrl" onclick="toggleMusic()">🎵 MUSIC: OFF</button>
+        <button id="mute-btn" class="audio-ctrl" onclick="toggleMusic()">MUSIC: OFF</button>
     </div>
 
+    <h1 class="main-title">BATTLESHIPS</h1>
+    <div class="stats-bar">TURNS: <span id="turn-count">0</span></div>
     <div id="status-text" class="deployment-msg">Deploy Your Fleet</div>
 
     <div class="game-layout">
+        
         <div id="sidebar" class="controls">
             <button class="ship-btn" id="btn-c" onclick="pickShip(5, 'btn-c', 'Carrier')">Carrier (5)</button>
             <button class="ship-btn" id="btn-b" onclick="pickShip(4, 'btn-b', 'Battleship')">Battleship (4)</button>
@@ -25,7 +25,7 @@
             <button class="ship-btn" id="btn-d" onclick="pickShip(3, 'btn-d', 'Destroyer')">Destroyer (3)</button>
             <button class="ship-btn" id="btn-p" onclick="pickShip(2, 'btn-p', 'Patrol')">Patrol Boat (2)</button>
             <button class="ship-btn rotate-btn" onclick="rotate()">ROTATE SHIP</button>
-            <button id="start-btn" onclick="lockIn()">ENGAGE ENEMY</button>
+            <button id="start-btn" class="ship-btn" style="background: var(--accent); text-align: center;" onclick="lockIn()">ENGAGE ENEMY</button>
         </div>
 
         <div class="grid-container">
@@ -40,30 +40,30 @@
     <div class="status-area">
         <div class="ship-box">
             <h3>MY FLEET</h3>
-            <div id="p-track-Carrier" class="status-indicator">Carrier (5)</div>
-            <div id="p-track-Battleship" class="status-indicator">Battleship (4)</div>
-            <div id="p-track-Submarine" class="status-indicator">Submarine (3)</div>
-            <div id="p-track-Destroyer" class="status-indicator">Destroyer (3)</div>
-            <div id="p-track-Patrol" class="status-indicator">Patrol Boat (2)</div>
+            <div id="p-track-Carrier" class="status-indicator">Carrier</div>
+            <div id="p-track-Battleship" class="status-indicator">Battleship</div>
+            <div id="p-track-Submarine" class="status-indicator">Submarine</div>
+            <div id="p-track-Destroyer" class="status-indicator">Destroyer</div>
+            <div id="p-track-Patrol" class="status-indicator">Patrol Boat</div>
         </div>
         <div class="ship-box">
             <h3>ENEMY FLEET</h3>
-            <div id="e-track-Carrier" class="status-indicator">Carrier (5)</div>
-            <div id="e-track-Battleship" class="status-indicator">Battleship (4)</div>
-            <div id="e-track-Submarine" class="status-indicator">Submarine (3)</div>
-            <div id="e-track-Destroyer" class="status-indicator">Destroyer (3)</div>
-            <div id="e-track-Patrol" class="status-indicator">Patrol Boat (2)</div>
+            <div id="e-track-Carrier" class="status-indicator">Carrier</div>
+            <div id="e-track-Battleship" class="status-indicator">Battleship</div>
+            <div id="e-track-Submarine" class="status-indicator">Submarine</div>
+            <div id="e-track-Destroyer" class="status-indicator">Destroyer</div>
+            <div id="e-track-Patrol" class="status-indicator">Patrol Boat</div>
         </div>
     </div>
 
     <div id="win-modal" class="overlay">
         <div class="modal-content">
             <h2 id="winner-msg">VICTORY</h2>
-            <button class="ship-btn" onclick="location.reload()">REDEPLOY</button>
+            <button class="ship-btn rotate-btn" onclick="location.reload()">REDEPLOY</button>
         </div>
     </div>
-
     <audio id="bg-music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+    
     <script src="static/script.js"></script>
 </body>
 </html>
