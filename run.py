@@ -1,52 +1,58 @@
 import random
-import os
 
-class BattleshipGame:
+class BattleshipEngine:
     """
-    LO7.1: Data model to manage game logic.
-    Handles board state and ship coordination.
+    LO7.1: Data model to manage the game state.
+    This class handles the core logic independently of the UI.
     """
     def __init__(self, size=10):
         self.size = size
-        # LO3.1: Aggregated data (nested lists)
-        self.board = [["~"] * size for _ in range(size)]
-        self.ships = []
+        # LO3.1: Aggregated data structures (nested lists)
+        self.player_grid = [['~' for _ in range(size)] for _ in range(size)]
+        self.enemy_grid = [['~' for _ in range(size)] for _ in range(size)]
+        self.enemy_ships = []
 
-    def validate_coordinate(self, row, col):
-        """LO2.1 & 3.2: Handles invalid input and errors gracefully."""
+    def validate_coordinates(self, r, c):
+        """LO2.1: Handles invalid input and ensures data is in range."""
         try:
-            r, c = int(row), int(col)
-            return 0 <= r < self.size and 0 <= c < self.size
+            row, col = int(r), int(c)
+            return 0 <= row < self.size and 0 <= col < self.size
         except (ValueError, TypeError):
+            # LO3.2: Error handling for non-integer inputs
             return False
 
-    def generate_enemy_ships(self):
-        """LO1: Algorithm implementation for ship placement."""
-        ship_sizes = [5, 4, 3, 3, 2]
-        for size in ship_sizes:
+    def generate_ai_ships(self):
+        """LO1: Algorithm implementation for random ship placement."""
+        ship_lengths = [5, 4, 3, 3, 2]
+        for length in ship_lengths:
             placed = False
             while not placed:
-                horizontal = random.choice([True, False])
-                start_row = random.randint(0, 9)
-                start_col = random.randint(0, 9)
+                is_horizontal = random.choice([True, False])
+                row = random.randint(0, 9)
+                col = random.randint(0, 9)
                 
-                path = []
-                for i in range(size):
-                    r = start_row if horizontal else start_row + i
-                    c = start_col + i if horizontal else start_col
-                    if self.validate_coordinate(r, c):
-                        path.append((r, c))
-                
-                if len(path) == size and not any(p in self.ships for p in path):
-                    self.ships.extend(path)
+                if self.can_place(row, col, length, is_horizontal):
+                    self.place_ship(row, col, length, is_horizontal)
                     placed = True
 
-def main():
-    """LO9.1: Entry point for the CLI application."""
-    print("--- BATTLESHIP CORE INITIALIZED ---")
-    game = BattleshipGame()
-    game.generate_enemy_ships()
-    print("Enemy fleet deployed. System ready for Web Interface.")
+    def can_place(self, r, c, length, horiz):
+        """Logic check for ship collisions and boundaries."""
+        for i in range(length):
+            curr_r = r if horiz else r + i
+            curr_c = c + i if horiz else c
+            if not self.validate_coordinates(curr_r, curr_c):
+                return False
+        return True
+
+    def place_ship(self, r, c, length, horiz):
+        """Updates the data model with ship positions."""
+        for i in range(length):
+            curr_r = r if horiz else r + i
+            curr_c = c + i if horiz else c
+            self.enemy_grid[curr_r][curr_c] = 'S'
 
 if __name__ == "__main__":
-    main()
+    # LO9.1: Entry point for deployment
+    print("Battleship Engine: Online")
+    engine = BattleshipEngine()
+    engine.generate_ai_ships()
