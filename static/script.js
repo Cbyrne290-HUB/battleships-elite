@@ -1,4 +1,4 @@
-/* Battleships - Final Distinction Logic */
+/* Battleships - Final Distinction Logic (Bug Fixes applied) */
 const pGrid = document.getElementById('player-grid');
 const eGrid = document.getElementById('enemy-grid');
 const statusText = document.getElementById('status-text');
@@ -14,16 +14,18 @@ let isTurn = false;
 let gameActive = false;
 let turns = 0;
 
-// Data Models for Sinking Logic
-// Maps cell Index -> Ship Name (e.g., 42: "Carrier")
+// Data Models
 let pShipMap = {}; 
 let eShipMap = {}; 
 
-// Maps Ship Name -> Remaining Health
+// Track Health
 let pFleetHealth = { 'Carrier': 5, 'Battleship': 4, 'Submarine': 3, 'Destroyer': 3, 'Patrol': 2 };
 let eFleetHealth = { 'Carrier': 5, 'Battleship': 4, 'Submarine': 3, 'Destroyer': 3, 'Patrol': 2 };
 
-// Arrays to track hit coordinates to prevent duplicates
+// Track Placed Status (Prevents multiple placements)
+let placedShips = { 'Carrier': false, 'Battleship': false, 'Submarine': false, 'Destroyer': false, 'Patrol': false };
+
+// Shot History
 let pShots = [];
 let eShots = [];
 
@@ -49,10 +51,11 @@ function createGrid(gridEl, type) {
 
 // --- SETUP PHASE ---
 function pickShip(size, name) {
-    // Hide the button for the ship we just picked
-    if(pFleetHealth[name] === 0) return; // Already placed check
+    // BUG FIX: Prevent picking if already placed
+    if(placedShips[name]) return; 
+    
     currentShip = { size: size, name: name };
-    // Highlight active button logic could go here
+    statusText.innerText = "PLACING: " + name.toUpperCase();
 }
 
 function rotate() { horizontal = !horizontal; }
@@ -69,10 +72,9 @@ function getPath(idx, size) {
     let row = Math.floor(idx / 10);
     for(let i=0; i<size; i++) {
         let n = horizontal ? idx + i : idx + (i*10);
-        // Boundary Checks
+        // Boundary & Collision Checks
         if(n > 99) return null;
         if(horizontal && Math.floor(n/10) !== row) return null;
-        // Collision Check
         if(pShipMap[n]) return null;
         path.push(n);
     }
@@ -84,16 +86,19 @@ function placeShip(idx) {
     const path = getPath(idx, currentShip.size);
     
     if(path) {
+        // Place Ship in Data
         path.forEach(i => {
             pGrid.children[i].classList.add('ship');
-            pShipMap[i] = currentShip.name; // Map index to Name
+            pShipMap[i] = currentShip.name; 
         });
         
-        // Hide button
+        // BUG FIX: Mark as placed and Hide Button Immediately
+        placedShips[currentShip.name] = true;
         document.getElementById('btn-' + currentShip.name).style.display = 'none';
         
         placedCount++;
         currentShip = null;
+        statusText.innerText = "SHIP DEPLOYED.";
         
         if(placedCount === 5) {
             statusText.innerText = "FLEET READY. AWAITING ORDERS.";
@@ -106,7 +111,8 @@ function placeShip(idx) {
 function lockIn() {
     document.getElementById('sidebar').style.display = 'none';
     document.getElementById('enemy-section').classList.remove('hidden-section');
-    document.getElementById('enemy-section').style.display = 'flex'; // Ensure flex for alignment
+    // Force Flex to fix layout
+    document.getElementById('enemy-section').style.display = 'flex'; 
     generateEnemyFleet();
     gameActive = true;
     isTurn = true;
@@ -117,7 +123,6 @@ function generateEnemyFleet() {
     const ships = [
         {n:'Carrier', s:5}, {n:'Battleship', s:4}, {n:'Submarine', s:3}, {n:'Destroyer', s:3}, {n:'Patrol', s:2}
     ];
-    
     ships.forEach(sh => {
         let placed = false;
         while(!placed) {
@@ -126,7 +131,6 @@ function generateEnemyFleet() {
             let path = [];
             let valid = true;
             let row = Math.floor(idx / 10);
-
             for(let i=0; i<sh.s; i++) {
                 let n = h ? idx + i : idx + (i*10);
                 if(n > 99 || (h && Math.floor(n/10) !== row) || eShipMap[n]) {
@@ -134,7 +138,6 @@ function generateEnemyFleet() {
                 }
                 path.push(n);
             }
-
             if(valid) {
                 path.forEach(i => eShipMap[i] = sh.n);
                 placed = true;
@@ -156,7 +159,7 @@ function playerAttack(idx) {
     if(shipName) {
         // HIT
         cell.classList.add('hit');
-        triggerShake(); // Screen Shake
+        triggerShake(); 
         statusText.innerText = "DIRECT HIT!";
         statusText.style.color = "#ef4444";
         
@@ -179,7 +182,6 @@ function playerAttack(idx) {
 
 function aiTurn() {
     if(!gameActive) return;
-    
     let idx;
     do { idx = Math.floor(Math.random()*100); } while(pShots.includes(idx));
     
@@ -189,9 +191,8 @@ function aiTurn() {
 
     if(shipName) {
         cell.classList.add('hit');
-        triggerShake(); // Screen Shake on taking damage
+        triggerShake();
         pFleetHealth[shipName]--;
-        
         if(pFleetHealth[shipName] === 0) {
             document.getElementById('p-stat-' + shipName).classList.add('sunk');
             checkLoss();
@@ -205,7 +206,7 @@ function aiTurn() {
     statusText.style.color = "#10b981";
 }
 
-// --- UTILS & FX ---
+// --- UTILS ---
 function triggerShake() {
     document.body.classList.add('shake-screen');
     setTimeout(() => document.body.classList.remove('shake-screen'), 500);
@@ -227,15 +228,19 @@ function endGame(msg) {
 
 // --- UI CONTROLS ---
 function toggleHelp(show) {
-    document.getElementById('help-modal').style.display = show ? 'flex' : 'none';
+    const modal = document.getElementById('help-modal');
+    modal.style.display = show ? 'flex' : 'none';
 }
 
 function toggleMusic() {
     if(bgMusic.paused) {
+        // Audio policy requires user interaction first
         bgMusic.play().then(() => {
             muteBtn.innerText = "🎵 MUSIC: ON";
             muteBtn.style.background = "#10b981";
-        }).catch(e => alert("Please interact with the page first!"));
+        }).catch(e => {
+            alert("Click the page once, then try the button again!");
+        });
     } else {
         bgMusic.pause();
         muteBtn.innerText = "🎵 MUSIC: OFF";

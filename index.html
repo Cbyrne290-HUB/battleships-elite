@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BATTLESHIPS</title>
+    <title>BATTLESHIPS ELITE</title>
     <link rel="stylesheet" href="static/style.css">
 </head>
 <body id="game-body">
@@ -66,21 +66,20 @@
     <div id="help-modal" class="overlay">
         <div class="modal-content">
             <h2>MISSION BRIEFING</h2>
-            <ul style="text-align: left; margin: 20px 0; color: #cbd5e1;">
-                <li>Deploy your 5 ships by clicking on the grid.</li>
-                <li>Press <strong>ROTATE</strong> to change orientation.</li>
-                <li>Once deployed, click <strong>ENGAGE ENEMY</strong>.</li>
-                <li>Take turns firing at the Enemy Grid.</li>
-                <li>First to sink all opposing ships wins.</li>
+            <ul style="text-align: left; margin: 20px 0; color: #cbd5e1; line-height: 1.6;">
+                <li><strong>Deploy:</strong> Select a ship and click the grid to place it.</li>
+                <li><strong>Rotate:</strong> Use the blue button to switch orientation.</li>
+                <li><strong>Engage:</strong> Once 5 ships are placed, hit Engage.</li>
+                <li><strong>Combat:</strong> Click the enemy grid to fire.</li>
             </ul>
-            <button class="ship-btn" onclick="toggleHelp(false)">UNDERSTOOD</button>
+            <button class="ship-btn rotate-btn" style="text-align:center" onclick="toggleHelp(false)">UNDERSTOOD</button>
         </div>
     </div>
 
     <div id="win-modal" class="overlay">
         <div class="modal-content">
             <h2 id="winner-msg">VICTORY</h2>
-            <button class="ship-btn rotate-btn" onclick="location.reload()">REDEPLOY</button>
+            <button class="ship-btn rotate-btn" style="text-align:center" onclick="location.reload()">REDEPLOY</button>
         </div>
     </div>
 
