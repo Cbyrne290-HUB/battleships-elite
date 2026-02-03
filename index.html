@@ -1,33 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Battleships Live</title>
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
-    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleship Master AI</title>
+    
 </head>
-<body style="background-color: #121212; color: #00FF00; font-family: 'Courier New', Courier, monospace; padding: 40px;">
-    <h1 style="color: white;">BATTLESHIPS: DEPLOYED VERSION</h1>
-    <p style="color: #888;">Initializing Python Environment... Please wait 5 seconds.</p>
-    <hr>
-    
-    <script type="py">
-import random
+<link rel="stylesheet" href="static/style.css">
+<script src="static/script.js"></script>
+<body id="game-body">
 
-def play_game():
-    print("--- WELCOME TO BATTLESHIPS LIVE ---")
-    size = 5
-    ship_row = random.randint(0, size - 1)
-    ship_col = random.randint(0, size - 1)
-    
-    print(f"The enemy ship is hidden in a {size}x{size} grid.")
-    print("This game is running live via GitHub Pages!")
-    print("-----------------------------------")
-    print(f"Assessor Note: Ship is at Row {ship_row}, Col {ship_col}")
-    print("Deployment Successful: LO9.1 Satisfied.")
+    <h1 class="main-title">Battleships</h1>
 
-play_game()
-    </script>
+    <div class="top-bar">
+        <button class="help-btn" onclick="toggleHelp(true)">HOW TO PLAY</button>
+        <div class="stats-bar">TURNS: <span id="turn-count">0</span></div>
+        <button class="audio-ctrl" id="mute-btn" onclick="toggleMusic()">🎵 MUSIC: OFF</button>
+    </div>
+
+    <h2 id="status-text" style="color: #94a3b8;">Deploy Your Fleet</h2>
+
+    <div class="game-layout">
+        <div class="controls" id="sidebar">
+            <div id="ship-buttons">
+                <button class="ship-btn" id="btn-5" onclick="pickShip(5, 'btn-5', 'Carrier')">Carrier (5)</button>
+                <button class="ship-btn" id="btn-4" onclick="pickShip(4, 'btn-4', 'Battleship')">Battleship (4)</button>
+                <button class="ship-btn" id="btn-3a" onclick="pickShip(3, 'btn-3a', 'Submarine')">Submarine (3)</button>
+                <button class="ship-btn" id="btn-3b" onclick="pickShip(3, 'btn-3b', 'Destroyer')">Destroyer (3)</button>
+                <button class="ship-btn" id="btn-2" onclick="pickShip(2, 'btn-2', 'Patrol Boat')">Patrol Boat (2)</button>
+            </div>
+            <button class="ship-btn" style="background: var(--player)" onclick="rotate()">ROTATE SHIP</button>
+            <button id="start-btn" onclick="lockIn()">LOCK IN & START</button>
+        </div>
+
+        <div class="grid-container"><div id="player-grid" class="grid"></div></div>
+        <div id="enemy-section" style="opacity: 0.1; pointer-events: none;">
+            <div class="grid-container"><div id="enemy-grid" class="grid"></div></div>
+        </div>
+    </div>
+
+    <div class="status-area">
+        <div class="ship-box"><h4>MY FLEET</h4><div id="p-track-Carrier" class="status-indicator">Carrier [5]</div><div id="p-track-Battleship" class="status-indicator">Battleship [4]</div><div id="p-track-Submarine" class="status-indicator">Submarine [3]</div><div id="p-track-Destroyer" class="status-indicator">Destroyer [3]</div><div id="p-track-Patrol" class="status-indicator">Patrol Boat [2]</div></div>
+        <div class="ship-box"><h4>ENEMY FLEET</h4><div id="e-track-Carrier" class="status-indicator">Carrier [5]</div><div id="e-track-Battleship" class="status-indicator">Battleship [4]</div><div id="e-track-Submarine" class="status-indicator">Submarine [3]</div><div id="e-track-Destroyer" class="status-indicator">Destroyer [3]</div><div id="e-track-Patrol" class="status-indicator">Patrol Boat [2]</div></div>
+    </div>
+
+    <div id="help-modal" class="overlay" onclick="toggleHelp(false)"><div class="modal-content" style="text-align:left;"><h3>Mission Briefing</h3><ol><li>Select a ship and place it on your grid.</li><li>Toggle 'Rotate' for vertical placement.</li><li>Once 5 ships are deployed, click 'Lock In'.</li><li>Fire at Enemy Waters. AI will hunt you if it scores a hit!</li></ol></div></div>
+    
+    <div id="win-modal" class="overlay"><div class="modal-content"><h2 id="winner-msg">YOU WIN!</h2><p id="final-stats" style="font-size: 1.2rem; margin-bottom: 20px;"></p><button onclick="location.reload()" style="background: var(--accent); color:white; padding: 15px 30px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">REDEPLOY FLEET</button></div></div>
+
+    <audio id="bg-music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"></audio>
+
+
 </body>
 </html>

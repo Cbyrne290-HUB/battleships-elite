@@ -1,0 +1,68 @@
+<style>
+        :root { 
+            --bg: #0f172a; --panel: #1e293b; --player: #3b82f6; 
+            --enemy: #ef4444; --accent: #10b981; --border: #475569;
+        }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 100vh; overflow-x: hidden; }
+        
+        /* Big Bold Centered Title */
+        .main-title { 
+            font-size: 5rem; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 12px; 
+            margin: 20px 0 10px 0; 
+            text-align: center; 
+            color: #fff;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 4px 4px 0px var(--panel);
+            width: 100%;
+        }
+
+        .top-bar { width: 100%; display: flex; justify-content: space-between; padding: 0 30px 15px 30px; box-sizing: border-box; align-items: center; }
+        .help-btn, .audio-ctrl { background: #334155; border: none; color: white; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        .help-btn { background: var(--player); }
+        .help-btn:hover { background: #2563eb; }
+
+        .stats-bar { font-size: 1.4rem; font-weight: bold; color: var(--accent); }
+
+        .game-layout { display: flex; gap: 40px; margin-top: 10px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+        .grid-container { border: 4px solid var(--border); padding: 5px; background: #000; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .grid { display: grid; grid-template-columns: repeat(10, 32px); grid-template-rows: repeat(10, 32px); gap: 2px; }
+        
+        .cell { width: 32px; height: 32px; background: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .cell.preview { background: rgba(59, 130, 246, 0.4); }
+        .cell.ship { background: var(--player); border: 1px solid rgba(255,255,255,0.1); }
+        .cell.hit { background: var(--enemy); box-shadow: inset 0 0 10px black; animation: splash 0.3s ease; }
+        .cell.hit::after { content: "💥"; font-size: 14px; }
+        .cell.miss { background: #334155; animation: splash 0.5s ease; }
+        .cell.miss::after { content: "•"; color: #94a3b8; }
+
+        @keyframes splash { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
+        .shake { animation: shakeEffect 0.4s; }
+        @keyframes shakeEffect {
+            0%, 100% { transform: translate(0,0); }
+            20% { transform: translate(-5px, 0); }
+            40% { transform: translate(5px, 0); }
+            60% { transform: translate(-5px, 0); }
+            80% { transform: translate(5px, 0); }
+        }
+
+        .status-area { display: flex; gap: 40px; margin: 30px 0; flex-wrap: wrap; justify-content: center; }
+        .ship-box { background: var(--panel); border: 2px solid var(--border); padding: 20px; border-radius: 12px; min-width: 180px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .status-indicator { padding: 8px; margin: 5px 0; background: #334155; border-radius: 6px; font-size: 13px; font-weight: 600; }
+        .status-indicator.sunk { background: var(--enemy); text-decoration: line-through; color: #fff; }
+
+        .controls { width: 220px; background: var(--panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+        .ship-btn { width: 100%; padding: 12px; margin: 6px 0; cursor: pointer; background: #475569; color: white; border: none; border-radius: 6px; font-weight: bold; }
+        #start-btn { width: 100%; padding: 18px; background: var(--accent); color: white; font-weight: bold; border: none; margin-top: 15px; display: none; cursor: pointer; border-radius: 8px; font-size: 1.1rem; }
+
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: var(--panel); padding: 50px; border-radius: 20px; border: 4px solid var(--accent); text-align: center; max-width: 500px; box-shadow: 0 0 50px var(--accent); }
+        .modal-content h2 { font-size: 4rem; color: var(--accent); margin: 0 0 20px 0; }
+        
+        @media (max-width: 768px) {
+            .main-title { font-size: 3rem; letter-spacing: 6px; }
+            .grid { grid-template-columns: repeat(10, 28px); grid-template-rows: repeat(10, 28px); }
+            .cell { width: 28px; height: 28px; }
+        }
+    </style>
