@@ -2,89 +2,147 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Battleship Pro 2026</title>
+    <title>Battleship Elite AI</title>
     <style>
-        :root { --bg: #0f172a; --panel: #1e293b; --player: #3b82f6; --enemy: #ef4444; --accent: #10b981; }
-        body { background: var(--bg); color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
+        :root { 
+            --bg: #0f172a; --panel: #1e293b; --player: #3b82f6; 
+            --enemy: #ef4444; --accent: #10b981; --border: #475569;
+        }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow-x: hidden; }
         
-        .game-layout { display: flex; gap: 30px; margin-top: 20px; }
-        .controls { width: 200px; background: var(--panel); padding: 20px; border-radius: 8px; }
-        
-        /* Grid Styling */
-        .grid { display: grid; grid-template-columns: repeat(10, 30px); grid-template-rows: repeat(10, 30px); gap: 2px; background: #334155; }
-        .cell { width: 30px; height: 30px; background: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        
-        /* States */
-        .cell.preview { background: rgba(59, 130, 246, 0.5); }
-        .cell.ship { background: var(--player); border: 1px solid white; }
-        .cell.hit { background: var(--enemy); }
-        .cell.hit::after { content: "X"; }
-        .cell.miss { background: #475569; }
-        .cell.miss::after { content: "•"; }
+        /* Header & Info */
+        .top-bar { width: 100%; display: flex; justify-content: space-between; padding: 15px 30px; box-sizing: border-box; }
+        .help-btn { background: var(--player); border: none; color: white; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .audio-ctrl { background: #334155; border: none; color: white; padding: 8px 15px; cursor: pointer; border-radius: 5px; }
 
-        /* Sidebar Buttons */
-        .ship-btn { width: 100%; padding: 10px; margin: 5px 0; cursor: pointer; background: #475569; color: white; border: none; }
-        .ship-btn.selected { background: var(--player); }
+        .game-layout { display: flex; gap: 40px; margin-top: 10px; align-items: flex-start; }
+        
+        /* Enclosed Grids */
+        .grid-container { border: 4px solid var(--border); padding: 5px; background: #000; border-radius: 8px; }
+        .grid { display: grid; grid-template-columns: repeat(10, 32px); grid-template-rows: repeat(10, 32px); gap: 2px; }
+        .cell { width: 32px; height: 32px; background: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .cell.preview { background: rgba(59, 130, 246, 0.4); }
+        .cell.ship { background: var(--player); }
+        .cell.hit { background: var(--enemy); box-shadow: inset 0 0 10px black; }
+        .cell.hit::after { content: "💥"; font-size: 14px; }
+        .cell.miss { background: #334155; }
+        .cell.miss::after { content: "•"; color: #94a3b8; }
+
+        /* Ship Status Boxes */
+        .status-area { display: flex; gap: 40px; margin-top: 30px; }
+        .ship-box { background: var(--panel); border: 2px solid var(--border); padding: 15px; border-radius: 10px; min-width: 180px; }
+        .ship-box h4 { margin: 0 0 10px 0; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+        .status-indicator { padding: 5px; margin: 3px 0; background: #334155; border-radius: 4px; font-size: 12px; transition: 0.5s; }
+        .status-indicator.sunk { background: var(--enemy); color: white; font-weight: bold; text-decoration: line-through; }
+
+        /* Sidebar & Modals */
+        .controls { width: 200px; background: var(--panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border); }
+        .ship-btn { width: 100%; padding: 10px; margin: 5px 0; cursor: pointer; background: #475569; color: white; border: none; border-radius: 4px; }
         #start-btn { width: 100%; padding: 15px; background: var(--accent); color: white; font-weight: bold; border: none; margin-top: 20px; display: none; cursor: pointer; }
 
-        #win-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: black; padding: 50px; border-radius: 15px; text-align: center; box-shadow: 0 0 100px black; }
+        /* Big Popups */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
+        .modal-content { background: var(--panel); padding: 60px; border-radius: 20px; border: 4px solid var(--accent); text-align: center; max-width: 600px; }
+        .modal-content h2 { font-size: 4rem; margin: 0; color: var(--accent); }
+        .help-content { background: var(--panel); padding: 30px; border-radius: 15px; max-width: 400px; border: 2px solid var(--player); text-align: left; }
     </style>
 </head>
 <body>
 
-    <h1>BATTLESHIP AI</h1>
-    <h3 id="status-text">Select a ship from the left</h3>
+    <div class="top-bar">
+        <button class="help-btn" onclick="toggleHelp(true)">HOW TO PLAY</button>
+        <button class="audio-ctrl" id="mute-btn" onclick="toggleMusic()">🎵 MUSIC: OFF</button>
+    </div>
+
+    <h2 id="status-text">Deploy Your Fleet</h2>
 
     <div class="game-layout">
         <div class="controls" id="sidebar">
             <div id="ship-buttons">
-                <button class="ship-btn" id="btn-5" onclick="pickShip(5, 'btn-5')">Carrier (5)</button>
-                <button class="ship-btn" id="btn-4" onclick="pickShip(4, 'btn-4')">Battleship (4)</button>
-                <button class="ship-btn" id="btn-3a" onclick="pickShip(3, 'btn-3a')">Submarine (3)</button>
-                <button class="ship-btn" id="btn-3b" onclick="pickShip(3, 'btn-3b')">Destroyer (3)</button>
-                <button class="ship-btn" id="btn-2" onclick="pickShip(2, 'btn-2')">Patrol Boat (2)</button>
+                <button class="ship-btn" id="btn-5" onclick="pickShip(5, 'btn-5', 'Carrier')">Carrier (5)</button>
+                <button class="ship-btn" id="btn-4" onclick="pickShip(4, 'btn-4', 'Battleship')">Battleship (4)</button>
+                <button class="ship-btn" id="btn-3a" onclick="pickShip(3, 'btn-3a', 'Submarine')">Submarine (3)</button>
+                <button class="ship-btn" id="btn-3b" onclick="pickShip(3, 'btn-3b', 'Destroyer')">Destroyer (3)</button>
+                <button class="ship-btn" id="btn-2" onclick="pickShip(2, 'btn-2', 'Patrol Boat')">Patrol Boat (2)</button>
             </div>
-            <button onclick="rotate()">ROTATE</button>
+            <button class="ship-btn" style="background: var(--player)" onclick="rotate()">ROTATE SHIP</button>
             <button id="start-btn" onclick="lockIn()">LOCK IN & START</button>
         </div>
 
         <div>
-            <p>Your Fleet</p>
-            <div id="player-grid" class="grid"></div>
+            <div class="grid-container"><div id="player-grid" class="grid"></div></div>
         </div>
 
-        <div id="enemy-section" style="opacity: 0.3; pointer-events: none;">
-            <p>Enemy Waters</p>
-            <div id="enemy-grid" class="grid"></div>
+        <div id="enemy-section" style="opacity: 0.1; pointer-events: none;">
+            <div class="grid-container"><div id="enemy-grid" class="grid"></div></div>
         </div>
     </div>
 
-    <div id="win-modal">
-        <h2 id="winner">YOU WIN!</h2>
-        <button onclick="location.reload()">PLAY AGAIN</button>
+    <div class="status-area">
+        <div class="ship-box">
+            <h4>MY FLEET</h4>
+            <div id="p-track-Carrier" class="status-indicator">Carrier [5]</div>
+            <div id="p-track-Battleship" class="status-indicator">Battleship [4]</div>
+            <div id="p-track-Submarine" class="status-indicator">Submarine [3]</div>
+            <div id="p-track-Destroyer" class="status-indicator">Destroyer [3]</div>
+            <div id="p-track-Patrol" class="status-indicator">Patrol Boat [2]</div>
+        </div>
+        <div class="ship-box">
+            <h4>ENEMY FLEET</h4>
+            <div id="e-track-Carrier" class="status-indicator">Carrier [5]</div>
+            <div id="e-track-Battleship" class="status-indicator">Battleship [4]</div>
+            <div id="e-track-Submarine" class="status-indicator">Submarine [3]</div>
+            <div id="e-track-Destroyer" class="status-indicator">Destroyer [3]</div>
+            <div id="e-track-Patrol" class="status-indicator">Patrol Boat [2]</div>
+        </div>
     </div>
+
+    <div id="help-modal" class="overlay" onclick="toggleHelp(false)">
+        <div class="help-content">
+            <h3>How to Play</h3>
+            <ol>
+                <li>Click a ship from the sidebar.</li>
+                <li>Press 'Rotate' to change orientation.</li>
+                <li>Place all ships on your grid.</li>
+                <li>Click 'Lock In' to start the battle.</li>
+                <li>Click enemy squares to fire. One shot each!</li>
+            </ol>
+            <p style="text-align:center; color: var(--accent)">Click anywhere to close</p>
+        </div>
+    </div>
+
+    <div id="win-modal" class="overlay">
+        <div class="modal-content">
+            <h2 id="winner-msg">YOU WIN!</h2>
+            <button onclick="location.reload()" style="background: var(--accent); color:white; padding: 20px 40px; border:none; border-radius:10px; font-size:20px; cursor:pointer; margin-top:20px;">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <audio id="bg-music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
 
 <script>
     const pGrid = document.getElementById('player-grid');
     const eGrid = document.getElementById('enemy-grid');
-    const status = document.getElementById('status-text');
+    const statusText = document.getElementById('status-text');
     const startBtn = document.getElementById('start-btn');
+    const music = document.getElementById('bg-music');
     
     let horizontal = true;
     let currentSize = 0;
-    let currentBtn = null;
-    let shipsPlaced = 0;
-    let playerShips = [];
-    let enemyShips = [];
+    let currentBtnId = null;
+    let placedCount = 0;
     let isTurn = false;
+    let musicOn = false;
 
-    // Create Grids
+    let pShips = { Carrier: [], Battleship: [], Submarine: [], Destroyer: [], Patrol: [] };
+    let eShips = { Carrier: [], Battleship: [], Submarine: [], Destroyer: [], Patrol: [] };
+
     function init() {
         for(let i=0; i<100; i++){
             let pCell = document.createElement('div');
             pCell.className = 'cell';
-            pCell.onmouseover = () => showPreview(i);
-            pCell.onmouseleave = () => clearPreview();
+            pCell.onmouseover = () => { if(currentSize) showPreview(i); };
+            pCell.onmouseleave = clearPreview;
             pCell.onclick = () => placeShip(i);
             pGrid.appendChild(pCell);
 
@@ -95,32 +153,36 @@
         }
     }
 
-    function rotate() { horizontal = !horizontal; }
-
-    function pickShip(size, id) {
-        currentSize = size;
-        currentBtn = id;
-        document.querySelectorAll('.ship-btn').forEach(b => b.classList.remove('selected'));
-        document.getElementById(id).classList.add('selected');
+    function toggleMusic() {
+        musicOn = !musicOn;
+        musicOn ? music.play() : music.pause();
+        document.getElementById('mute-btn').innerText = musicOn ? "🎵 MUSIC: ON" : "🎵 MUSIC: OFF";
     }
 
+    function toggleHelp(show) { document.getElementById('help-modal').style.display = show ? 'flex' : 'none'; }
+
+    function pickShip(size, id, name) {
+        currentSize = size; currentBtnId = id; currentShipName = name;
+        document.querySelectorAll('.ship-btn').forEach(b => b.style.border = "none");
+        document.getElementById(id).style.border = "2px solid white";
+    }
+
+    function rotate() { horizontal = !horizontal; }
+
     function showPreview(idx) {
-        if(!currentSize) return;
         clearPreview();
         const path = getPath(idx, currentSize);
         if(path) path.forEach(i => pGrid.children[i].classList.add('preview'));
     }
 
-    function clearPreview() {
-        Array.from(pGrid.children).forEach(c => c.classList.remove('preview'));
-    }
+    function clearPreview() { Array.from(pGrid.children).forEach(c => c.classList.remove('preview')); }
 
     function getPath(idx, size) {
         let path = [];
-        for(let i=0; i<size; i++) {
-            let next = horizontal ? idx + i : idx + (i*10);
-            if(next > 99 || (horizontal && Math.floor(next/10) !== Math.floor(idx/10))) return null;
-            path.push(next);
+        for(let i=0; i<size; i++){
+            let n = horizontal ? idx + i : idx + (i*10);
+            if(n > 99 || (horizontal && Math.floor(n/10) !== Math.floor(idx/10))) return null;
+            path.push(n);
         }
         return path;
     }
@@ -128,22 +190,16 @@
     function placeShip(idx) {
         if(!currentSize) return;
         const path = getPath(idx, currentSize);
-        if(!path || path.some(i => playerShips.includes(i))) return;
+        const allPlaced = Object.values(pShips).flat();
+        if(!path || path.some(p => allPlaced.includes(p))) return;
 
-        path.forEach(i => {
-            playerShips.push(i);
-            pGrid.children[i].classList.add('ship');
-        });
+        let key = currentShipName === "Patrol Boat" ? "Patrol" : currentShipName;
+        pShips[key] = path;
+        path.forEach(i => pGrid.children[i].classList.add('ship'));
 
-        // REMOVE FROM SIDEBAR
-        document.getElementById(currentBtn).remove();
-        currentSize = 0;
-        shipsPlaced++;
-        
-        if(shipsPlaced === 5) {
-            startBtn.style.display = 'block';
-            status.innerText = "All ships ready! Lock them in.";
-        }
+        document.getElementById(currentBtnId).style.display = 'none';
+        currentSize = 0; placedCount++;
+        if(placedCount === 5) startBtn.style.display = 'block';
     }
 
     function lockIn() {
@@ -152,66 +208,62 @@
         document.getElementById('enemy-section').style.pointerEvents = 'auto';
         generateEnemy();
         isTurn = true;
-        status.innerText = "GAME ON! Fire at the enemy.";
+        statusText.innerText = "BATTLE STATIONS!";
     }
 
     function generateEnemy() {
-        const sizes = [5,4,3,3,2];
-        sizes.forEach(s => {
+        const data = [{n:'Carrier', s:5}, {n:'Battleship', s:4}, {n:'Submarine', s:3}, {n:'Destroyer', s:3}, {n:'Patrol', s:2}];
+        data.forEach(ship => {
             let placed = false;
             while(!placed) {
                 let h = Math.random() > 0.5;
                 let start = Math.floor(Math.random()*100);
                 let path = [];
-                for(let i=0; i<s; i++){
+                for(let i=0; i<ship.s; i++){
                     let n = h ? start + i : start + (i*10);
-                    if(n < 100 && (!h || Math.floor(n/10) === Math.floor(start/10)) && !enemyShips.includes(n)) path.push(n);
+                    if(n < 100 && (!h || Math.floor(n/10) === Math.floor(start/10)) && !Object.values(eShips).flat().includes(n)) path.push(n);
                 }
-                if(path.length === s) {
-                    enemyShips = [...enemyShips, ...path];
-                    placed = true;
-                }
+                if(path.length === ship.s) { eShips[ship.n] = path; placed = true; }
             }
         });
     }
 
     function playerAttack(i) {
         if(!isTurn || eGrid.children[i].classList.contains('hit') || eGrid.children[i].classList.contains('miss')) return;
-        
-        if(enemyShips.includes(i)) {
-            eGrid.children[i].classList.add('hit');
-            enemyShips = enemyShips.filter(s => s !== i);
-        } else {
-            eGrid.children[i].classList.add('miss');
+        let hit = false;
+        for(let name in eShips) {
+            if(eShips[name].includes(i)) {
+                eGrid.children[i].classList.add('hit');
+                eShips[name] = eShips[name].filter(c => c !== i);
+                if(eShips[name].length === 0) document.getElementById(`e-track-${name}`).classList.add('sunk');
+                hit = true; break;
+            }
         }
-
-        if(enemyShips.length === 0) return win("YOU WIN!");
-        
-        isTurn = false;
-        status.innerText = "AI is aiming...";
-        setTimeout(aiAttack, 800);
+        if(!hit) eGrid.children[i].classList.add('miss');
+        if(Object.values(eShips).flat().length === 0) return end("YOU WIN!");
+        isTurn = false; setTimeout(aiMove, 600);
     }
 
-    function aiAttack() {
-        let rand;
-        do { rand = Math.floor(Math.random()*100); } 
-        while(pGrid.children[rand].classList.contains('hit') || pGrid.children[rand].classList.contains('miss'));
-
-        if(playerShips.includes(rand)) {
-            pGrid.children[rand].classList.add('hit');
-            playerShips = playerShips.filter(s => s !== rand);
-        } else {
-            pGrid.children[rand].classList.add('miss');
+    function aiMove() {
+        let r;
+        do { r = Math.floor(Math.random()*100); } while(pGrid.children[r].classList.contains('hit') || pGrid.children[r].classList.contains('miss'));
+        let hit = false;
+        for(let name in pShips) {
+            if(pShips[name].includes(r)) {
+                pGrid.children[r].classList.add('hit');
+                pShips[name] = pShips[name].filter(c => c !== r);
+                if(pShips[name].length === 0) document.getElementById(`p-track-${name}`).classList.add('sunk');
+                hit = true; break;
+            }
         }
-
-        if(playerShips.length === 0) return win("AI WINS!");
+        if(!hit) pGrid.children[r].classList.add('miss');
+        if(Object.values(pShips).flat().length === 0) return end("AI WINS!");
         isTurn = true;
-        status.innerText = "Your Turn!";
     }
 
-    function win(txt) {
-        document.getElementById('winner').innerText = txt;
-        document.getElementById('win-modal').style.display = 'block';
+    function end(m) {
+        document.getElementById('winner-msg').innerText = m;
+        document.getElementById('win-modal').style.display = 'flex';
     }
 
     init();
