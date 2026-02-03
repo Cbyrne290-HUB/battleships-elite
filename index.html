@@ -2,76 +2,94 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>High-Ticket Battleship</title>
+    <title>Pro Battleship: Player vs AI</title>
     <style>
         :root {
-            --bg: #0a0e14;
-            --grid-border: #1f2937;
-            --player-color: #3b82f6;
-            --ai-color: #ef4444;
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --player: #3b82f6;
+            --enemy: #ef4444;
+            --hit: #f59e0b;
             --accent: #10b981;
         }
 
         body {
-            background: var(--bg);
+            background-color: var(--bg);
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin: 0;
             padding: 20px;
         }
 
-        .game-container {
+        .game-layout {
             display: flex;
-            gap: 50px;
+            gap: 40px;
             margin-top: 20px;
         }
 
-        /* Sidebar Styling */
-        #sidebar {
-            width: 200px;
-            background: #111827;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--grid-border);
+        /* Sidebar & Controls */
+        .controls {
+            width: 220px;
+            background: var(--panel);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .ship-item {
-            background: #374151;
-            margin: 10px 0;
-            padding: 10px;
+        .ship-btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #334155;
+            border: 1px solid #475569;
+            color: white;
             cursor: pointer;
-            text-align: center;
-            border-radius: 4px;
-            transition: 0.3s;
+            border-radius: 6px;
         }
 
-        .ship-item:hover { background: var(--player-color); }
+        .ship-btn.active { border-color: var(--player); background: #1e3a8a; }
 
-        /* Board Styling */
-        .board {
+        #rotate-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 6px;
+        }
+
+        /* Boards */
+        .board-label { text-align: center; margin-bottom: 10px; font-weight: bold; }
+        .grid {
             display: grid;
-            grid-template-columns: repeat(10, 30px);
-            grid-template-rows: repeat(10, 30px);
+            grid-template-columns: repeat(10, 32px);
+            grid-template-rows: repeat(10, 32px);
             gap: 2px;
-            border: 2px solid var(--grid-border);
+            background: #475569;
+            border: 2px solid #475569;
         }
 
         .cell {
-            width: 30px;
-            height: 30px;
-            background: #1f2937;
-            border: 1px solid #111827;
+            width: 32px;
+            height: 32px;
+            background: var(--bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            cursor: pointer;
         }
 
-        .cell.hit { background: var(--ai-color); }
-        .cell.miss { background: #4b5563; }
-        .cell.ship { background: var(--player-color); }
+        .cell.ship { background: var(--player); }
+        .cell.hit { background: var(--hit); position: relative; }
+        .cell.hit::after { content: "💥"; font-size: 14px; }
+        .cell.miss { background: #334155; }
+        .cell.miss::after { content: "•"; color: #94a3b8; }
 
         /* Win Modal */
         #win-modal {
@@ -79,46 +97,52 @@
             position: fixed;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            background: #1f2937;
-            padding: 40px;
-            border: 2px solid var(--accent);
+            background: var(--panel);
+            padding: 50px;
+            border-radius: 20px;
             text-align: center;
-            z-index: 100;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            box-shadow: 0 0 100px rgba(0,0,0,0.8);
+            border: 2px solid var(--accent);
+            z-index: 1000;
         }
 
-        button {
-            padding: 10px 20px;
+        #win-modal button {
             background: var(--accent);
-            border: none;
             color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
             cursor: pointer;
-            font-weight: bold;
-            margin-top: 15px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-    <h1>BATTLESHIP AI</h1>
-    <p id="status">Place your ships to begin!</p>
+    <h1>BATTLESHIP AI 2026</h1>
+    <h3 id="status">Select a ship to place it</h3>
 
-    <div class="game-container">
-        <div id="sidebar">
-            <h3>Ships</h3>
-            <div id="ship-1" class="ship-item" onclick="selectShip(1, 'Carrier')">Carrier (5)</div>
-            <div id="ship-2" class="ship-item" onclick="selectShip(2, 'Battleship')">Battleship (4)</div>
-            <div id="ship-3" class="ship-item" onclick="selectShip(3, 'Sub')">Submarine (3)</div>
+    <div class="game-layout">
+        <div class="controls" id="sidebar">
+            <div id="ship-list">
+                <button class="ship-btn" onclick="selectShip(5, 'ship-5')">Carrier (5)</button>
+                <button class="ship-btn" onclick="selectShip(4, 'ship-4')">Battleship (4)</button>
+                <button class="ship-btn" onclick="selectShip(3, 'ship-3')">Submarine (3)</button>
+                <button class="ship-btn" onclick="selectShip(3, 'ship-3b')">Destroyer (3)</button>
+                <button class="ship-btn" onclick="selectShip(2, 'ship-2')">Patrol Boat (2)</button>
+            </div>
+            <button id="rotate-btn" onclick="toggleRotation()">ROTATE: HORIZONTAL</button>
         </div>
 
         <div>
-            <h3>Your Fleet</h3>
-            <div id="player-board" class="board"></div>
+            <div class="board-label">YOUR FLEET</div>
+            <div id="player-grid" class="grid"></div>
         </div>
 
         <div>
-            <h3>Enemy Waters</h3>
-            <div id="enemy-board" class="board"></div>
+            <div class="board-label">ENEMY WATERS</div>
+            <div id="enemy-grid" class="grid"></div>
         </div>
     </div>
 
@@ -128,116 +152,150 @@
     </div>
 
 <script>
-    const playerBoardUI = document.getElementById('player-board');
-    const enemyBoardUI = document.getElementById('enemy-board');
-    const statusText = document.getElementById('status');
-    
-    let isPlayerTurn = false;
-    let selectedShipId = null;
+    const playerGrid = document.getElementById('player-grid');
+    const enemyGrid = document.getElementById('enemy-grid');
+    const status = document.getElementById('status');
+    const rotateBtn = document.getElementById('rotate-btn');
+
+    let isHorizontal = true;
+    let selectedSize = 0;
+    let selectedBtnId = null;
     let playerShipsPlaced = 0;
-    const totalShips = 3;
+    let gameStarted = false;
+    let isPlayerTurn = false;
 
+    let playerShipCoords = new Set();
+    let enemyShipCoords = new Set();
     let playerHits = 0;
-    let aiHits = 0;
+    let enemyHits = 0;
 
-    // Initialize Boards
-    function createBoard(uiElement, clickHandler) {
+    // 1. Setup Grids
+    function createGrid(el, type) {
         for (let i = 0; i < 100; i++) {
             const cell = document.createElement('div');
             cell.classList.add('cell');
             cell.dataset.index = i;
-            cell.addEventListener('click', () => clickHandler(i));
-            uiElement.appendChild(cell);
+            cell.addEventListener('click', () => type === 'player' ? placeShip(i) : attack(i));
+            el.appendChild(cell);
         }
     }
 
-    // 1. SHIP PLACEMENT LOGIC
-    function selectShip(id, name) {
-        selectedShipId = id;
-        statusText.innerText = "Click your board to place " + name;
+    // 2. Rotation & Selection
+    function toggleRotation() {
+        isHorizontal = !isHorizontal;
+        rotateBtn.innerText = isHorizontal ? "ROTATE: HORIZONTAL" : "ROTATE: VERTICAL";
     }
 
-    function handlePlayerPlacement(index) {
-        if (selectedShipId === null) return;
-        
-        const cell = playerBoardUI.children[index];
-        if (cell.classList.contains('ship')) return;
+    function selectShip(size, btnId) {
+        if(gameStarted) return;
+        selectedSize = size;
+        selectedBtnId = btnId;
+        status.innerText = `Placing ${size}-length ship...`;
+    }
 
-        cell.classList.add('ship');
+    // 3. Placement Logic
+    function placeShip(idx) {
+        if (gameStarted || !selectedSize) return;
+
+        const coords = [];
+        for (let i = 0; i < selectedSize; i++) {
+            let next = isHorizontal ? idx + i : idx + (i * 10);
+            
+            // Boundary checks
+            if (next > 99 || (isHorizontal && Math.floor(next/10) !== Math.floor(idx/10))) return;
+            if (playerShipCoords.has(next)) return;
+            coords.push(next);
+        }
+
+        coords.forEach(c => {
+            playerShipCoords.add(c);
+            playerGrid.children[c].classList.add('ship');
+        });
+
+        // HIDE SHIP FROM SIDEBAR
+        event.target.closest('.controls').querySelector(`button[onclick*='${selectedBtnId}']`).style.display = 'none';
         
-        // HIDE FROM SIDEBAR
-        document.getElementById('ship-' + selectedShipId).style.display = 'none';
-        
-        selectedShipId = null;
+        selectedSize = 0;
         playerShipsPlaced++;
 
-        if (playerShipsPlaced === totalShips) {
-            startBattle();
+        if (playerShipsPlaced === 5) {
+            setupEnemy();
+            gameStarted = true;
+            isPlayerTurn = true;
+            status.innerText = "ALL SHIPS PLACED. ATTACK!";
         }
     }
 
-    // 2. BATTLE LOGIC
-    function startBattle() {
-        isPlayerTurn = true;
-        statusText.innerText = "BATTLE START! Click Enemy Waters.";
-        // AI random ships (Simplified for demo: just 5 random spots)
-        for (let i = 0; i < 10; i++) {
-            let rand = Math.floor(Math.random() * 100);
-            enemyBoardUI.children[rand].dataset.hasShip = "true";
-        }
+    // 4. AI Setup
+    function setupEnemy() {
+        const sizes = [5, 4, 3, 3, 2];
+        sizes.forEach(size => {
+            let placed = false;
+            while (!placed) {
+                let isH = Math.random() > 0.5;
+                let start = Math.floor(Math.random() * 100);
+                let tempCoords = [];
+                let valid = true;
+
+                for (let i = 0; i < size; i++) {
+                    let next = isH ? start + i : start + (i * 10);
+                    if (next > 99 || (isH && Math.floor(next/10) !== Math.floor(start/10)) || enemyShipCoords.has(next)) {
+                        valid = false; break;
+                    }
+                    tempCoords.push(next);
+                }
+                if (valid) {
+                    tempCoords.forEach(c => enemyShipCoords.add(c));
+                    placed = true;
+                }
+            }
+        });
     }
 
-    function handlePlayerShot(index) {
-        if (!isPlayerTurn) return;
-        
-        const cell = enemyBoardUI.children[index];
-        if (cell.classList.contains('hit') || cell.classList.contains('miss')) return;
+    // 5. Turn-Based Gameplay
+    function attack(idx) {
+        if (!isPlayerTurn || enemyGrid.children[idx].classList.contains('hit') || enemyGrid.children[idx].classList.contains('miss')) return;
 
-        if (cell.dataset.hasShip === "true") {
-            cell.classList.add('hit');
+        if (enemyShipCoords.has(idx)) {
+            enemyGrid.children[idx].classList.add('hit');
             playerHits++;
         } else {
-            cell.classList.add('miss');
+            enemyGrid.children[idx].classList.add('miss');
         }
 
-        checkWin();
+        if (playerHits === 17) return endGame("YOU WIN!");
+        
         isPlayerTurn = false;
-        statusText.innerText = "Computer is thinking...";
-        setTimeout(computerTurn, 800);
+        status.innerText = "Computer's turn...";
+        setTimeout(computerMove, 600);
     }
 
-    // 3. COMPUTER TURN (ONE SHOT EACH)
-    function computerTurn() {
+    function computerMove() {
         let rand;
         do {
             rand = Math.floor(Math.random() * 100);
-        } while (playerBoardUI.children[rand].classList.contains('hit') || playerBoardUI.children[rand].classList.contains('miss'));
+        } while (playerGrid.children[rand].classList.contains('hit') || playerGrid.children[rand].classList.contains('miss'));
 
-        const cell = playerBoardUI.children[rand];
-        if (cell.classList.contains('ship')) {
-            cell.classList.add('hit');
-            aiHits++;
+        if (playerShipCoords.has(rand)) {
+            playerGrid.children[rand].classList.add('hit');
+            enemyHits++;
         } else {
-            cell.classList.add('miss');
+            playerGrid.children[rand].classList.add('miss');
         }
 
-        checkWin();
+        if (enemyHits === 17) return endGame("COMPUTER WINS!");
+        
         isPlayerTurn = true;
-        statusText.innerText = "Your Turn!";
+        status.innerText = "Your turn!";
     }
 
-    function checkWin() {
-        if (playerHits >= 5) triggerWin("YOU WIN!");
-        if (aiHits >= 3) triggerWin("AI WINS!");
-    }
-
-    function triggerWin(text) {
-        document.getElementById('win-text').innerText = text;
+    function endGame(msg) {
+        document.getElementById('win-text').innerText = msg;
         document.getElementById('win-modal').style.display = 'block';
     }
 
-    createBoard(playerBoardUI, handlePlayerPlacement);
-    createBoard(enemyBoardUI, handlePlayerShot);
+    createGrid(playerGrid, 'player');
+    createGrid(enemyGrid, 'enemy');
 </script>
 </body>
 </html>
