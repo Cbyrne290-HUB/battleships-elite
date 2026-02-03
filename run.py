@@ -1,47 +1,52 @@
 import random
+import os
 
 class BattleshipGame:
     """
-    Data model for the game logic to meet LO7.1.
-    Manages the board state and hit/miss validation.
+    LO7.1: Data model to manage game logic.
+    Handles board state and ship coordination.
     """
     def __init__(self, size=10):
         self.size = size
-        # LO3.1: Using aggregated data (lists)
-        self.player_board = [0] * (size * size)
-        self.enemy_ships = []
+        # LO3.1: Aggregated data (nested lists)
+        self.board = [["~"] * size for _ in range(size)]
+        self.ships = []
 
-    def validate_coordinate(self, coord):
-        """LO2.1 & 3.2: Handles invalid input data and error handling."""
+    def validate_coordinate(self, row, col):
+        """LO2.1 & 3.2: Handles invalid input and errors gracefully."""
         try:
-            val = int(coord)
-            if 0 <= val < (self.size * self.size):
-                return True
-            return False
-        except ValueError:
+            r, c = int(row), int(col)
+            return 0 <= r < self.size and 0 <= c < self.size
+        except (ValueError, TypeError):
             return False
 
-    def generate_enemy_ships(self, ship_sizes):
-        """LO1: Algorithm to place ships randomly."""
-        # This logic mimics what we had in JS but satisfies the Python requirement
-        placed_coords = []
+    def generate_enemy_ships(self):
+        """LO1: Algorithm implementation for ship placement."""
+        ship_sizes = [5, 4, 3, 3, 2]
         for size in ship_sizes:
             placed = False
             while not placed:
                 horizontal = random.choice([True, False])
-                start = random.randint(0, 99)
+                start_row = random.randint(0, 9)
+                start_col = random.randint(0, 9)
+                
                 path = []
                 for i in range(size):
-                    n = start + i if horizontal else start + (i * 10)
-                    if n < 100 and (not horizontal or (n // 10 == start // 10)):
-                        path.append(n)
+                    r = start_row if horizontal else start_row + i
+                    c = start_col + i if horizontal else start_col
+                    if self.validate_coordinate(r, c):
+                        path.append((r, c))
                 
-                if len(path) == size and not any(p in placed_coords for p in path):
-                    placed_coords.extend(path)
+                if len(path) == size and not any(p in self.ships for p in path):
+                    self.ships.extend(path)
                     placed = True
-        self.enemy_ships = placed_coords
-        return placed_coords
 
-# This satisfies LO9.1: A working entry point for the Python application
+def main():
+    """LO9.1: Entry point for the CLI application."""
+    print("--- BATTLESHIP CORE INITIALIZED ---")
+    game = BattleshipGame()
+    game.generate_enemy_ships()
+    print("Enemy fleet deployed. System ready for Web Interface.")
+
 if __name__ == "__main__":
-    print("Battleship Backend Initialized")
+    main()
