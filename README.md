@@ -82,3 +82,31 @@ The application is specifically targeted toward strategy enthusiasts and casual 
 * An option for users to choose between a "Quick Skirmish" (7x7 grid) or an "Epic War" (12x12 grid).
 
 * Value: Increases the replayability of the game by allowing users to choose the length of their play session.
+
+## User Experience (UX)
+
+#### Project Goals
+* My main objective for Battleships Elite was to modernize the classic naval strategy experience, creating a web-based tool that feels like a high-stakes tactical simulation rather than a static board game.
+
+#### User Experience Goals
+* Tactical Immersion: I wanted to make naval warfare engaging. By incorporating a "Deployment Phase" and cinematic "Screen Shake" effects, I aimed to give players a sense of weight and impact with every command.
+
+* Intuitive Design: I focused on building a UI that requires no manual. Through "ghost" placement previews and clear button labeling, a user can deploy their fleet and engage the enemy within seconds.
+
+* Visceral Feedback: It was vital that the game felt responsive. I utilized immediate visual cues (Red for hits, Gray for misses) and synchronized audio to provide an instantaneous feedback loop for every action.
+
+#### Technical & Learning Goals
+* Dynamic State Management: A primary goal was mastering JavaScript to handle the transition between the Placement Phase and the Combat Phase without a page refresh, maintaining the game state in the background.
+
+* Grid Coordinate Logic: I challenged myself to build a robust coordinate system that prevents ship overlapping and ensures ships do not "wrap around" the grid borders, maintaining strict game rules.
+
+* Mobile-First Polish: I focused on ensuring the "Command Console" remained perfectly aligned and interactive on everything from a small smartphone to a large desktop monitor using CSS Flexbox and Media Queries.
+
+#### User Stories
+* As a first-time visitor, I want to intuitively understand how to place my ships so I can start the game without reading a long tutorial.
+
+* As a player, I want to feel the impact of my strikes through visual and audio feedback so the game feels exciting and rewarding.
+
+* As a strategic player, I want to track the remaining ships in the enemy fleet so I can plan my next moves based on which vessels are still afloat.
+
+* As a mobile user, I want the buttons and grid cells to be large enough to tap accurately so I don't make accidental moves on a small screen.
