@@ -205,7 +205,7 @@ I scored the exact same on the laptops performance, accessibility, SEO and best 
 
 <img width="942" height="534" alt="Screenshot 2026-02-03 at 23 52 49" src="https://github.com/user-attachments/assets/a4b76cc0-2070-4580-8273-071cb6f25c6b" />
 
-#### Deployment
+## Deployment
 * The site was deployed to GitHub pages. The steps to deploy are as follows:
 
 <img width="55" height="48" alt="Screenshot 2025-12-31 at 01 17 01" src="https://github.com/user-attachments/assets/8ac1a447-321c-4015-beb8-110e9149b504" />
