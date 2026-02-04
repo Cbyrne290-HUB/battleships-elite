@@ -207,12 +207,20 @@ I scored the exact same on the laptops performance, accessibility, SEO and best 
 
 #### Deployment
 * The site was deployed to GitHub pages. The steps to deploy are as follows:
+
 <img width="55" height="48" alt="Screenshot 2025-12-31 at 01 17 01" src="https://github.com/user-attachments/assets/8ac1a447-321c-4015-beb8-110e9149b504" />
+
 * In the GitHub repository, navigate to the Settings tab
+
 <img width="141" height="32" alt="Screenshot 2026-02-04 at 01 37 48" src="https://github.com/user-attachments/assets/4cc8dbf6-7642-4c40-b464-0084571f06ef" />
 <img width="98" height="33" alt="Screenshot 2026-02-04 at 01 38 04" src="https://github.com/user-attachments/assets/04b1e2ee-505e-48db-9d32-78a1eca5d906" />
+
 * From the source section drop-down menu, select the Master Branch
+
 <img width="772" height="227" alt="Screenshot 2026-02-04 at 01 39 08" src="https://github.com/user-attachments/assets/8c368578-f906-4121-8bc5-5cbe6b1517a5" />
+
 * Once the master branch has been selected, the page will be automatically refreshed with a detailed ribbon display to indicate the successful deployment.
+
 <img width="789" height="77" alt="Screenshot 2026-02-04 at 01 40 16" src="https://github.com/user-attachments/assets/56253584-d8db-4981-9b63-8c72bb2f04ac" />
+
 * The live link can be found here - [https://cbyrne290-hub.github.io/battleships-elite/](https://cbyrne290-hub.github.io/battleships-elite/)
