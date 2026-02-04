@@ -143,7 +143,7 @@ Text/Overlays,High-Viz White,#ffffff,Maximum readability for HUD stats and alert
 #### Branding & Iconography
 * The visual identity of Battleships Elite—from the grid icons to the splash screen—was designed to bridge the gap between classic board games and modern tactical simulators. By using consistent "Glow" effects on the buttons and high-contrast markers on the grids, I created a cohesive visual link between the "Commander" persona and the actual gameplay. This establishes a polished, "Studio-Quality" feel from the moment the user enters the deployment phase.
 
-#### Technologies Used
+## Technologies Used
 
 Python 3: Used for the backend logic and data handling. I focused on writing clean, modular code and ensured it followed PEP8 standards for professional readability.
 
@@ -262,3 +262,21 @@ I scored the exact same on the laptops performance, accessibility, SEO and best 
 <img width="789" height="77" alt="Screenshot 2026-02-04 at 01 40 16" src="https://github.com/user-attachments/assets/56253584-d8db-4981-9b63-8c72bb2f04ac" />
 
 * The live link can be found here - [https://cbyrne290-hub.github.io/battleships-elite/](https://cbyrne290-hub.github.io/battleships-elite/)
+
+## Credits
+#### Media & Assets 
+* Background Music: The cinematic track used in the game is provided by [CodeSkulptor Demos](https://py2.codeskulptor.org/demos.html#tabs-Hall-of-Fame). 
+
+* Color Palette: Tactical color hex codes were researched and generated using [Coolors.co](https://coolors.co/). 
+
+* Typography: The 'Nunito' font is provided by [Google Fonts](https://fonts.google.com/). 
+
+#### Tools & Deployment 🛠️
+Validation: Code was checked for errors using the [W3C HTML Validator](https://validator.w3.org/), [W3C CSS Validator](https://jigsaw.w3.org/css-validator/) and [JSHint](https://jshint.com/). 
+
+Performance: Audits were conducted using [Google Lighthouse](https://pagespeed.web.dev/) in Chrome DevTools to ensure a smooth user experience. 
+
+Hosting: The project is hosted on [GitHub Pages](https://github.com/). 
+
+Acknowledgments 
+A huge thanks to my college instructors for their feedback and help so far in my software journey. Their guidance helped me turn a simple grid into a fully functional tactical simulation. 
