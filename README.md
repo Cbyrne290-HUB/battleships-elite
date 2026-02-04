@@ -271,7 +271,7 @@ I scored the exact same on the laptops performance, accessibility, SEO and best 
 
 * Typography: The 'Nunito' font is provided by [Google Fonts](https://fonts.google.com/). 
 
-#### Tools & Deployment 🛠️
+#### Tools & Deployment 
 Validation: Code was checked for errors using the [W3C HTML Validator](https://validator.w3.org/), [W3C CSS Validator](https://jigsaw.w3.org/css-validator/) and [JSHint](https://jshint.com/). 
 
 Performance: Audits were conducted using [Google Lighthouse](https://pagespeed.web.dev/) in Chrome DevTools to ensure a smooth user experience. 
