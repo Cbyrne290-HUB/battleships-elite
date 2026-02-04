@@ -3,42 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Battleships Elite: A tactical naval strategy game. Deploy your fleet and engage the enemy AI.">
     <title>BATTLESHIPS ELITE</title>
     <link rel="stylesheet" href="static/style.css">
 </head>
 <body id="game-body">
     
     <div class="top-bar">
-        <button class="help-btn" onclick="toggleHelp(true)">HOW TO PLAY</button>
-        <button id="mute-btn" class="audio-ctrl" onclick="toggleMusic()">🎵 MUSIC: OFF</button>
+        <button class="help-btn" onclick="toggleHelp(true)" aria-label="Open mission briefing instructions">HOW TO PLAY</button>
+        <button id="mute-btn" class="audio-ctrl" onclick="toggleMusic()" aria-label="Toggle background music">🎵 MUSIC: OFF</button>
     </div>
 
     <h1 class="main-title">BATTLESHIPS</h1>
-    <div class="stats-bar">TURNS: <span id="turn-count">0</span></div>
-    <div id="status-text" class="deployment-msg">Deploy Your Fleet</div>
+    <div class="stats-bar" aria-live="polite">TURNS: <span id="turn-count">0</span></div>
+    <div id="status-text" class="deployment-msg" role="status">Deploy Your Fleet</div>
 
     <div class="game-layout">
         <div id="sidebar" class="controls">
-            <button class="ship-btn" id="btn-Carrier" onclick="pickShip(5, 'Carrier')">Carrier (5)</button>
-            <button class="ship-btn" id="btn-Battleship" onclick="pickShip(4, 'Battleship')">Battleship (4)</button>
-            <button class="ship-btn" id="btn-Submarine" onclick="pickShip(3, 'Submarine')">Submarine (3)</button>
-            <button class="ship-btn" id="btn-Destroyer" onclick="pickShip(3, 'Destroyer')">Destroyer (3)</button>
-            <button class="ship-btn" id="btn-Patrol" onclick="pickShip(2, 'Patrol')">Patrol Boat (2)</button>
-            <button class="ship-btn rotate-btn" onclick="rotate()">ROTATE SHIP</button>
-            <button id="start-btn" class="ship-btn" style="background: var(--accent); text-align: center;" onclick="lockIn()">ENGAGE ENEMY</button>
+            <button class="ship-btn" id="btn-Carrier" onclick="pickShip(5, 'Carrier')" aria-label="Select Carrier, size 5">Carrier (5)</button>
+            <button class="ship-btn" id="btn-Battleship" onclick="pickShip(4, 'Battleship')" aria-label="Select Battleship, size 4">Battleship (4)</button>
+            <button class="ship-btn" id="btn-Submarine" onclick="pickShip(3, 'Submarine')" aria-label="Select Submarine, size 3">Submarine (3)</button>
+            <button class="ship-btn" id="btn-Destroyer" onclick="pickShip(3, 'Destroyer')" aria-label="Select Destroyer, size 3">Destroyer (3)</button>
+            <button class="ship-btn" id="btn-Patrol" onclick="pickShip(2, 'Patrol')" aria-label="Select Patrol Boat, size 2">Patrol Boat (2)</button>
+            
+            <button class="ship-btn rotate-btn" onclick="rotate()" aria-label="Rotate ship orientation">ROTATE SHIP</button>
+            <button id="start-btn" class="ship-btn" style="background: var(--accent); text-align: center;" onclick="lockIn()" aria-label="Lock in fleet and start combat">ENGAGE ENEMY</button>
         </div>
 
         <div class="grid-wrapper">
             <div class="grid-label">FRIENDLY WATERS</div>
             <div class="grid-container">
-                <div id="player-grid" class="grid"></div>
+                <div id="player-grid" class="grid" aria-label="Player fleet grid"></div>
             </div>
         </div>
 
         <div id="enemy-section" class="grid-wrapper hidden-section">
             <div class="grid-label" style="color:var(--enemy)">HOSTILE WATERS</div>
             <div class="grid-container">
-                <div id="enemy-grid" class="grid"></div>
+                <div id="enemy-grid" class="grid" aria-label="Enemy fleet grid"></div>
             </div>
         </div>
     </div>
@@ -62,23 +64,23 @@
         </div>
     </div>
 
-    <div id="help-modal" class="overlay">
+    <div id="help-modal" class="overlay" role="dialog" aria-labelledby="modal-title">
         <div class="modal-content">
-            <h2>MISSION BRIEFING</h2>
+            <h2 id="modal-title">MISSION BRIEFING</h2>
             <ul style="text-align: left; margin: 20px 0; color: #cbd5e1; line-height: 1.6;">
                 <li><strong>Deploy:</strong> Pick a ship and click the grid.</li>
                 <li><strong>Rotate:</strong> Use the blue button to flip ship.</li>
                 <li><strong>Engage:</strong> Place all 5 to start combat.</li>
                 <li><strong>Combat:</strong> Click the enemy grid to fire.</li>
             </ul>
-            <button class="ship-btn rotate-btn" style="text-align:center" onclick="toggleHelp(false)">UNDERSTOOD</button>
+            <button class="ship-btn rotate-btn" style="text-align:center" onclick="toggleHelp(false)" aria-label="Close briefing">UNDERSTOOD</button>
         </div>
     </div>
 
-    <div id="win-modal" class="overlay">
+    <div id="win-modal" class="overlay" role="alertdialog">
         <div class="modal-content">
             <h2 id="winner-msg">VICTORY</h2>
-            <button class="ship-btn rotate-btn" style="text-align:center" onclick="location.reload()">REDEPLOY</button>
+            <button class="ship-btn rotate-btn" style="text-align:center" onclick="location.reload()" aria-label="Restart game and redeploy">REDEPLOY</button>
         </div>
     </div>
 
