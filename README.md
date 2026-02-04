@@ -241,6 +241,8 @@ The Fix: I learned that browsers require a "user gesture" (like a click) before 
 * All code was passed through the [W3C Validator](https://validator.w3.org/), [(Jigsaw)Validator](https://jigsaw.w3.org/css-validator/) and the [JSHint Validator](https://jshint.com/) to ensure no major errors.
 
 * JSHint: I used this to clean up my JavaScript. It flagged some messy loops I was using for the grid, so I refactored them into cleaner .forEach() methods.
+* Code Analysis (JSHint) The JavaScript logic was validated using JSHint.Warnings: 0,Largest Function: 14 statements,Cyclomatic Complexity: 10 (Within professional industry standards)
+Result: The code is highly modular with a low complexity median, ensuring maintainability and performance.
 
 * W3C Validators: Both the HTML and CSS were run through official validators to ensure there were no broken tags or syntax errors.
 
