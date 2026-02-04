@@ -6,6 +6,17 @@ The application is specifically targeted toward strategy enthusiasts and casual 
 
 <img width="942" height="534" alt="Screenshot 2026-02-03 at 23 52 49" src="https://github.com/user-attachments/assets/b242c534-8337-46b6-982b-c4086e725e77" />
 
+## Table of Contents
+
+- [Project Overview](#Project-Overview)
+- [Features](#Features)
+- [User Experience](#User-Experience)
+- [Design](#Design)
+- [Technologies Used](#Technologies Used) 
+- [Testing & Logic Validation(#Testing & Logic Validation) 
+- [Deployment](#Deployment) 
+- [Credits](#Credits) 
+
 ## Project overview
 
 #### Why I Built Battleships Elite
