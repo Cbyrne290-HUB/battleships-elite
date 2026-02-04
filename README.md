@@ -235,6 +235,9 @@ I scored the exact same on the laptops performance, accessibility, SEO and best 
 ### Browser Compatibility: 
 * Tested the game on Safari and Google Chrome.
 
+<img width="1726" height="1078" alt="Screenshot 2026-02-04 at 01 58 15" src="https://github.com/user-attachments/assets/c3a8dd32-6dc0-4304-af1e-3ebd71ee0997" />
+<img width="1726" height="1080" alt="Screenshot 2026-02-04 at 02 00 31" src="https://github.com/user-attachments/assets/14bd812c-f36e-451a-9e40-c1bb6f8f88eb" />
+
 ### Device Testing: 
 * Verified that the buttons and images scale correctly on all devices like the imac,macbook,ipad and iphone all came back with images and buttons working perfectly. 
 
