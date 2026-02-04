@@ -143,6 +143,40 @@ Text/Overlays,High-Viz White,#ffffff,Maximum readability for HUD stats and alert
 #### Branding & Iconography
 * The visual identity of Battleships Elite—from the grid icons to the splash screen—was designed to bridge the gap between classic board games and modern tactical simulators. By using consistent "Glow" effects on the buttons and high-contrast markers on the grids, I created a cohesive visual link between the "Commander" persona and the actual gameplay. This establishes a polished, "Studio-Quality" feel from the moment the user enters the deployment phase.
 
+#### Technologies Used
+
+Python 3: Used for the backend logic and data handling. I focused on writing clean, modular code and ensured it followed PEP8 standards for professional readability.
+
+<img width="262" height="221" alt="Screenshot 2026-02-04 at 01 50 50" src="https://github.com/user-attachments/assets/5771c9d7-0051-4b07-a493-1121122e392e" />
+
+HTML5: Used to create the structural "Command Center" layout, utilizing semantic elements like <main>, <nav>, and <section> to ensure high accessibility scores.
+
+<img width="442" height="520" alt="Screenshot 2026-02-04 at 01 51 36" src="https://github.com/user-attachments/assets/3eec84df-935d-473d-9e1e-334c71617a55" />
+
+CSS3: Used for the tactical "Dark Mode" styling, including Flexbox for grid alignment and custom keyframe animations for the "Screen Shake" effects.
+
+<img width="398" height="488" alt="Screenshot 2026-02-04 at 01 51 55" src="https://github.com/user-attachments/assets/691deb42-b25f-4627-a8e1-342890edf670" />
+
+JavaScript (ES6+): The engine of the game. Used for DOM manipulation, managing the ship deployment state, and handling the AI combat logic through efficient array methods like .forEach().
+
+<img width="330" height="375" alt="Screenshot 2026-02-04 at 01 52 13" src="https://github.com/user-attachments/assets/306d0780-eb4e-4a6d-866e-9be65b1bbb1e" />
+
+Fonts: Specifically the 'Nunito' family, chosen for its high legibility and modern "Head-Up Display" (HUD) aesthetic.
+
+<img width="193" height="51" alt="Screenshot 2025-12-30 at 22 35 05" src="https://github.com/user-attachments/assets/0bbdecf0-a398-4075-b733-3f82124f4fb1" />
+
+Coolors: Used to research and generate a high-contrast naval color palette that balances accessibility with a tactical military feel.
+
+<img width="152" height="56" alt="Screenshot 2025-12-30 at 22 35 51" src="https://github.com/user-attachments/assets/9e425835-b57b-4758-9303-c8fec639f332" />
+
+GitHub / GitHub Pages: Utilized for version control with regular commits and for hosting the live production site.
+
+<img width="55" height="48" alt="Screenshot 2025-12-31 at 01 17 01" src="https://github.com/user-attachments/assets/db191fde-c552-44e0-be9a-4da2f5c57ee6" />
+
+Google Lighthouse: Used throughout development to audit and optimize performance, SEO, and accessibility.
+
+<img width="455" height="225" alt="Screenshot 2026-02-04 at 01 52 49" src="https://github.com/user-attachments/assets/7dcf7082-48ae-4fbf-8b68-c5167075bfbf" />
+
 ## Testing & Logic Validation
 #### Design Philosophy
 * When I started building Battleships Elite, my goal was to create a game that felt "snappy" and responsive. I wanted the transition from placing ships to fighting the AI to be seamless. Most of my testing time was spent in the browser console, making sure that when a user clicks a coordinate, the game knows exactly which fleet is being hit and updates the health bars instantly.
