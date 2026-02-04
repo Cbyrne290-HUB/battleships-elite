@@ -148,6 +148,17 @@ Text/Overlays,High-Viz White,#ffffff,Maximum readability for HUD stats and alert
 
 <img width="193" height="51" alt="Screenshot 2025-12-30 at 22 35 05" src="https://github.com/user-attachments/assets/050b1f72-2887-4fc8-8fe1-48bc90be18df" />
 
+#### Logic Flowcharts 
+To ensure the game logic was solid before coding, I designed flowcharts to map out the primary loops of the game. These diagrams helped me visualize the turn-based system and the "Hit/Miss" validation logic.
+
+Ship Deployment Flow: This covers how the system checks if a ship is within bounds and not overlapping before locking it in.
+
+<img width="912" height="216" alt="Screenshot 2026-02-03 at 23 44 45" src="https://github.com/user-attachments/assets/ecf2c63c-1174-4ea1-8e25-d1d3ef90258a" />
+
+Combat Loop: This tracks the process from a player clicking the enemy grid to the AI calculating its counter-attack.
+
+<img width="1108" height="290" alt="Screenshot 2026-02-03 at 23 48 14" src="https://github.com/user-attachments/assets/dede19b8-02ed-4e76-bf1e-278a04c9977c" />
+
 #### Headings & UI Structure
 * A clear visual hierarchy was implemented to make Battleships Elite intuitive. By using bold, uppercase titles for the "Command Console" and "Fleet Status," I created a visual path that guides the user from deployment to combat. Proper HTML5 semantic tags were used throughout to ensure the layout is organized and accessible for screen readers, ensuring the "Status" updates are always the focal point.
 
