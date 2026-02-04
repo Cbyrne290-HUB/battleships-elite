@@ -110,3 +110,35 @@ The application is specifically targeted toward strategy enthusiasts and casual 
 * As a strategic player, I want to track the remaining ships in the enemy fleet so I can plan my next moves based on which vessels are still afloat.
 
 * As a mobile user, I want the buttons and grid cells to be large enough to tap accurately so I don't make accidental moves on a small screen.
+
+## Design
+
+#### Colour Scheme
+* The color palette for Battleships Elite was selected to evoke the atmosphere of a high-tech naval command center. Using a tool called [coolors](Coolors.co), I developed a palette that balances deep "Sonar Blues" with high-visibility "Tactical Neons."The dark background gradients represent the depths of the ocean and the low-light environment of a submarine bridge, providing a high-contrast backdrop that makes the vibrant strike indicators (Red) and positioning markers (Green) pop. This "Dark Mode" aesthetic reduces eye strain during extended play sessions while maintaining a modern, professional "Elite" feel.
+
+#### Role,Color,Name,HexCode,Purpose
+Background (Top),Deep Command Blue,#1e3c72,Main brand identity and tactical contrast.
+
+Background (Bottom),Abyss Blue,#2a5298,Adds depth to the UI and mimics the sea.
+
+Primary ActionTactical,Green,#4eca72,Used for "Engage Enemy" and ship placement.
+
+Strike/DamageWarning,Red,#dc3545,Immediate,feedback for hits and critical alerts.
+
+Secondary ActionSteel,Gray,#6c757d,Used for secondary UI buttons and "Miss" markers.
+
+Text/Overlays,High-Viz White,#ffffff,Maximum readability for HUD stats and alerts.
+
+<img width="1727" height="638" alt="Screenshot 2026-02-04 at 00 51 51" src="https://github.com/user-attachments/assets/d2ec8f28-e063-4b36-9bba-b6701995b867" />
+<img width="152" height="56" alt="Screenshot 2025-12-30 at 22 35 51" src="https://github.com/user-attachments/assets/e2b79cd8-d7b3-432f-b02e-955080f0606a" />
+
+#### Typography
+* I used the 'Nunito' font family from[Google Fonts](https://fonts.google.com/) for this project. While the game has a military theme, I chose 'Nunito' because its clean, rounded style provides the clarity of a modern digital display (HUD) without feeling dated.Hierarchy: I used extra-bold weights (800) for headers to mimic "Classification" titles found on military documents.Legibility: Medium weights were used for buttons and grid coordinates to ensure the user can make split-second tactical decisions on any device size.
+
+<img width="193" height="51" alt="Screenshot 2025-12-30 at 22 35 05" src="https://github.com/user-attachments/assets/050b1f72-2887-4fc8-8fe1-48bc90be18df" />
+
+#### Headings & UI Structure
+* A clear visual hierarchy was implemented to make Battleships Elite intuitive. By using bold, uppercase titles for the "Command Console" and "Fleet Status," I created a visual path that guides the user from deployment to combat. Proper HTML5 semantic tags were used throughout to ensure the layout is organized and accessible for screen readers, ensuring the "Status" updates are always the focal point.
+
+#### Branding & Iconography
+* The visual identity of Battleships Elite—from the grid icons to the splash screen—was designed to bridge the gap between classic board games and modern tactical simulators. By using consistent "Glow" effects on the buttons and high-contrast markers on the grids, I created a cohesive visual link between the "Commander" persona and the actual gameplay. This establishes a polished, "Studio-Quality" feel from the moment the user enters the deployment phase.
