@@ -191,12 +191,16 @@ The Fix: I learned that browsers require a "user gesture" (like a click) before 
 
 
 #### Lighthouse Report
-I have tested my site on performance, accessibility, SEO and best practices on both mobile and laptop. on mobile I scored a (96) on performance and I scored a (100) on accessibility, SEO and best practices.
-I scored all (100's) on the laptops performace, accessibility, SEO and best practices. Overall this is nearly a perfect score on both mobile on laptop even with the room for improvement.
+I have tested my site on performance, accessibility, SEO and best practices on both mobile and laptop. on mobile I scored a (100) on performance,SEO and best practices and I scored a (93) on accessibility
+I scored the exact same on the laptops performance, accessibility, SEO and best practices. Overall this is nearly a perfect score on both mobile on laptop even with the room for improvement.
 
+<img width="1728" height="926" alt="Screenshot 2026-02-04 at 01 29 40" src="https://github.com/user-attachments/assets/b18034b0-922c-4ca6-9e1a-5492996bcb02" />
+<img width="1728" height="928" alt="Screenshot 2026-02-04 at 01 29 49" src="https://github.com/user-attachments/assets/5c18e03f-8dfa-4c0f-87cd-d85e0132dad4" />
 
 ### Browser Compatibility: 
 * Tested the game on Safari and Google Chrome.
 
 ### Device Testing: 
 * Verified that the buttons and images scale correctly on all devices like the imac,macbook,ipad and iphone all came back with images and buttons working perfectly. 
+
+<img width="942" height="534" alt="Screenshot 2026-02-03 at 23 52 49" src="https://github.com/user-attachments/assets/a4b76cc0-2070-4580-8273-071cb6f25c6b" />
