@@ -18,6 +18,8 @@
     </header>
 
     <main>
+        <h2 class="sr-only" style="display:none;">Battle Station</h2>
+
         <div class="stats-bar" aria-live="polite">TURNS: <span id="turn-count">0</span></div>
         <div id="status-text" class="deployment-msg" role="status">Deploy Your Fleet</div>
 
@@ -34,21 +36,22 @@
             </nav>
 
             <section class="grid-wrapper" aria-labelledby="friendly-label">
-                <div id="friendly-label" class="grid-label">FRIENDLY WATERS</div>
+                <h2 id="friendly-label" class="grid-label">FRIENDLY WATERS</h2>
                 <div class="grid-container">
                     <div id="player-grid" class="grid" role="img" aria-label="Player ship deployment grid"></div>
                 </div>
             </section>
 
             <section id="enemy-section" class="grid-wrapper hidden-section" aria-labelledby="hostile-label">
-                <div id="hostile-label" class="grid-label" style="color:var(--enemy)">HOSTILE WATERS</div>
+                <h2 id="hostile-label" class="grid-label" style="color:var(--enemy)">HOSTILE WATERS</h2>
                 <div class="grid-container">
                     <div id="enemy-grid" class="grid" role="img" aria-label="Enemy target grid"></div>
                 </div>
             </section>
         </div>
 
-        <section class="status-area" aria-label="Fleet Status Reports">
+        <section class="status-area" aria-labelledby="status-report-title">
+            <h2 id="status-report-title" class="sr-only" style="display:none;">Fleet Status Reports</h2>
             <div class="ship-box">
                 <h3>MY FLEET</h3>
                 <div id="p-stat-Carrier" class="status-indicator">Carrier</div>
