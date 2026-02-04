@@ -2,69 +2,73 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Battleships Elite: A tactical naval strategy game. Deploy your fleet and engage the enemy AI.">
     <title>BATTLESHIPS ELITE</title>
     <link rel="stylesheet" href="static/style.css">
 </head>
 <body id="game-body">
     
-    <div class="top-bar">
-        <button class="help-btn" onclick="toggleHelp(true)" aria-label="Open mission briefing instructions">HOW TO PLAY</button>
-        <button id="mute-btn" class="audio-ctrl" onclick="toggleMusic()" aria-label="Toggle background music">🎵 MUSIC: OFF</button>
-    </div>
+    <header>
+        <div class="top-bar">
+            <button class="help-btn" onclick="toggleHelp(true)" aria-label="Open mission briefing instructions">HOW TO PLAY</button>
+            <button id="mute-btn" class="audio-ctrl" onclick="toggleMusic()" aria-label="Toggle background music">🎵 MUSIC: OFF</button>
+        </div>
+        <h1 class="main-title">BATTLESHIPS</h1>
+    </header>
 
-    <h1 class="main-title">BATTLESHIPS</h1>
-    <div class="stats-bar" aria-live="polite">TURNS: <span id="turn-count">0</span></div>
-    <div id="status-text" class="deployment-msg" role="status">Deploy Your Fleet</div>
+    <main>
+        <div class="stats-bar" aria-live="polite">TURNS: <span id="turn-count">0</span></div>
+        <div id="status-text" class="deployment-msg" role="status">Deploy Your Fleet</div>
 
-    <div class="game-layout">
-        <div id="sidebar" class="controls">
-            <button class="ship-btn" id="btn-Carrier" onclick="pickShip(5, 'Carrier')" aria-label="Select Carrier, size 5">Carrier (5)</button>
-            <button class="ship-btn" id="btn-Battleship" onclick="pickShip(4, 'Battleship')" aria-label="Select Battleship, size 4">Battleship (4)</button>
-            <button class="ship-btn" id="btn-Submarine" onclick="pickShip(3, 'Submarine')" aria-label="Select Submarine, size 3">Submarine (3)</button>
-            <button class="ship-btn" id="btn-Destroyer" onclick="pickShip(3, 'Destroyer')" aria-label="Select Destroyer, size 3">Destroyer (3)</button>
-            <button class="ship-btn" id="btn-Patrol" onclick="pickShip(2, 'Patrol')" aria-label="Select Patrol Boat, size 2">Patrol Boat (2)</button>
-            
-            <button class="ship-btn rotate-btn" onclick="rotate()" aria-label="Rotate ship orientation">ROTATE SHIP</button>
-            <button id="start-btn" class="ship-btn" style="background: var(--accent); text-align: center;" onclick="lockIn()" aria-label="Lock in fleet and start combat">ENGAGE ENEMY</button>
+        <div class="game-layout">
+            <nav id="sidebar" class="controls" aria-label="Game Controls">
+                <button class="ship-btn" id="btn-Carrier" onclick="pickShip(5, 'Carrier')" aria-label="Select Carrier, size 5">Carrier (5)</button>
+                <button class="ship-btn" id="btn-Battleship" onclick="pickShip(4, 'Battleship')" aria-label="Select Battleship, size 4">Battleship (4)</button>
+                <button class="ship-btn" id="btn-Submarine" onclick="pickShip(3, 'Submarine')" aria-label="Select Submarine, size 3">Submarine (3)</button>
+                <button class="ship-btn" id="btn-Destroyer" onclick="pickShip(3, 'Destroyer')" aria-label="Select Destroyer, size 3">Destroyer (3)</button>
+                <button class="ship-btn" id="btn-Patrol" onclick="pickShip(2, 'Patrol')" aria-label="Select Patrol Boat, size 2">Patrol Boat (2)</button>
+                
+                <button class="ship-btn rotate-btn" onclick="rotate()" aria-label="Rotate ship orientation">ROTATE SHIP</button>
+                <button id="start-btn" class="ship-btn" style="background: var(--accent); text-align: center;" onclick="lockIn()" aria-label="Lock in fleet and start combat">ENGAGE ENEMY</button>
+            </nav>
+
+            <section class="grid-wrapper" aria-labelledby="friendly-label">
+                <div id="friendly-label" class="grid-label">FRIENDLY WATERS</div>
+                <div class="grid-container">
+                    <div id="player-grid" class="grid" role="img" aria-label="Player ship deployment grid"></div>
+                </div>
+            </section>
+
+            <section id="enemy-section" class="grid-wrapper hidden-section" aria-labelledby="hostile-label">
+                <div id="hostile-label" class="grid-label" style="color:var(--enemy)">HOSTILE WATERS</div>
+                <div class="grid-container">
+                    <div id="enemy-grid" class="grid" role="img" aria-label="Enemy target grid"></div>
+                </div>
+            </section>
         </div>
 
-        <div class="grid-wrapper">
-            <div class="grid-label">FRIENDLY WATERS</div>
-            <div class="grid-container">
-                <div id="player-grid" class="grid" aria-label="Player fleet grid"></div>
+        <section class="status-area" aria-label="Fleet Status Reports">
+            <div class="ship-box">
+                <h3>MY FLEET</h3>
+                <div id="p-stat-Carrier" class="status-indicator">Carrier</div>
+                <div id="p-stat-Battleship" class="status-indicator">Battleship</div>
+                <div id="p-stat-Submarine" class="status-indicator">Submarine</div>
+                <div id="p-stat-Destroyer" class="status-indicator">Destroyer</div>
+                <div id="p-stat-Patrol" class="status-indicator">Patrol Boat</div>
             </div>
-        </div>
-
-        <div id="enemy-section" class="grid-wrapper hidden-section">
-            <div class="grid-label" style="color:var(--enemy)">HOSTILE WATERS</div>
-            <div class="grid-container">
-                <div id="enemy-grid" class="grid" aria-label="Enemy fleet grid"></div>
+            <div class="ship-box">
+                <h3>ENEMY FLEET</h3>
+                <div id="e-stat-Carrier" class="status-indicator">Carrier</div>
+                <div id="e-stat-Battleship" class="status-indicator">Battleship</div>
+                <div id="e-stat-Submarine" class="status-indicator">Submarine</div>
+                <div id="e-stat-Destroyer" class="status-indicator">Destroyer</div>
+                <div id="e-stat-Patrol" class="status-indicator">Patrol Boat</div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
-    <div class="status-area">
-        <div class="ship-box">
-            <h3>MY FLEET</h3>
-            <div id="p-stat-Carrier" class="status-indicator">Carrier</div>
-            <div id="p-stat-Battleship" class="status-indicator">Battleship</div>
-            <div id="p-stat-Submarine" class="status-indicator">Submarine</div>
-            <div id="p-stat-Destroyer" class="status-indicator">Destroyer</div>
-            <div id="p-stat-Patrol" class="status-indicator">Patrol Boat</div>
-        </div>
-        <div class="ship-box">
-            <h3>ENEMY FLEET</h3>
-            <div id="e-stat-Carrier" class="status-indicator">Carrier</div>
-            <div id="e-stat-Battleship" class="status-indicator">Battleship</div>
-            <div id="e-stat-Submarine" class="status-indicator">Submarine</div>
-            <div id="e-stat-Destroyer" class="status-indicator">Destroyer</div>
-            <div id="e-stat-Patrol" class="status-indicator">Patrol Boat</div>
-        </div>
-    </div>
-
-    <div id="help-modal" class="overlay" role="dialog" aria-labelledby="modal-title">
+    <div id="help-modal" class="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-content">
             <h2 id="modal-title">MISSION BRIEFING</h2>
             <ul style="text-align: left; margin: 20px 0; color: #cbd5e1; line-height: 1.6;">
@@ -77,7 +81,7 @@
         </div>
     </div>
 
-    <div id="win-modal" class="overlay" role="alertdialog">
+    <div id="win-modal" class="overlay" role="alertdialog" aria-modal="true">
         <div class="modal-content">
             <h2 id="winner-msg">VICTORY</h2>
             <button class="ship-btn rotate-btn" style="text-align:center" onclick="location.reload()" aria-label="Restart game and redeploy">REDEPLOY</button>
