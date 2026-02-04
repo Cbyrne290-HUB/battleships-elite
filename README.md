@@ -151,6 +151,7 @@ Python 3: Used for the backend logic and data handling. I focused on writing cle
 
 HTML5: Used to create the structural "Command Center" layout, utilizing semantic elements like <main>, <nav>, and <section> to ensure high accessibility scores.
 
+
 <img width="442" height="520" alt="Screenshot 2026-02-04 at 01 51 36" src="https://github.com/user-attachments/assets/3eec84df-935d-473d-9e1e-334c71617a55" />
 
 CSS3: Used for the tactical "Dark Mode" styling, including Flexbox for grid alignment and custom keyframe animations for the "Screen Shake" effects.
