@@ -124,7 +124,6 @@ function attack(i) {
         }
         if (Object.values(eFleetHealth).every(v => v === 0)) end("VICTORY");
     } else {
-        // PLAYER MISS - Applying class to enemy grid
         eGrid.children[i].classList.add('miss');
     }
     isTurn = false;
@@ -145,7 +144,6 @@ function ai() {
         }
         if (Object.values(pFleetHealth).every(v => v === 0)) end("DEFEAT");
     } else {
-        // AI MISS - Applying class to player grid
         pGrid.children[i].classList.add('miss');
     }
     isTurn = true;
