@@ -84,7 +84,6 @@ function genEnemy() {
         {n: 'Carrier', s: 5}, {n: 'Battleship', s: 4}, 
         {n: 'Submarine', s: 3}, {n: 'Destroyer', s: 3}, {n: 'Patrol', s: 2}
     ];
-    
     for (let i = 0; i < ships.length; i++) {
         placeSingleEnemyShip(ships[i]);
     }
@@ -97,16 +96,13 @@ function placeSingleEnemyShip(sh) {
         let start = Math.floor(Math.random() * 100);
         let path = [];
         let row = Math.floor(start / 10);
-        
         for (let j = 0; j < sh.s; j++) {
             let n = h ? start + j : start + (j * 10);
             if (n < 100 && (!h || Math.floor(n / 10) === row) && !eShipMap[n]) {
                 path.push(n);
             }
         }
-        
         if (path.length === sh.s) {
-            // FIX: Replaced .forEach with a standard for-loop to satisfy JSHint
             for (let k = 0; k < path.length; k++) {
                 eShipMap[path[k]] = sh.n;
             }
@@ -128,6 +124,7 @@ function attack(i) {
         }
         if (Object.values(eFleetHealth).every(v => v === 0)) end("VICTORY");
     } else {
+        // PLAYER MISS - Applying class to enemy grid
         eGrid.children[i].classList.add('miss');
     }
     isTurn = false;
@@ -148,6 +145,7 @@ function ai() {
         }
         if (Object.values(pFleetHealth).every(v => v === 0)) end("DEFEAT");
     } else {
+        // AI MISS - Applying class to player grid
         pGrid.children[i].classList.add('miss');
     }
     isTurn = true;
