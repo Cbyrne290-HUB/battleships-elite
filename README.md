@@ -306,7 +306,6 @@ I scored the exact same on the laptops performance, accessibility, SEO and best 
 <img width="789" height="77" alt="Screenshot 2026-02-04 at 01 40 16" src="https://github.com/user-attachments/assets/56253584-d8db-4981-9b63-8c72bb2f04ac" />
 
 * The live link can be found here - [https://cbyrne290-hub.github.io/battleships-elite/](https://cbyrne290-hub.github.io/battleships-elite/)
-
 ## Credits
 #### Media & Assets 
 * Background Music: The cinematic track used in the game is provided by [CodeSkulptor Demos](https://py2.codeskulptor.org/demos.html#tabs-Hall-of-Fame). 
