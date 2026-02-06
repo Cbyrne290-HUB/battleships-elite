@@ -70,7 +70,7 @@ The application is specifically targeted toward strategy enthusiasts and casual 
 
 #### Adaptive Fleet Status HUD
 
-* A live tracking system in the status area that updates as ships are damaged or sunk, complete with a "strike-through" visual for destroyed vessels.
+* A live tracking system in the status area that updates as ships are sunk, complete with a "strike-through" visual for destroyed vessels.
 
 * Value: Allows the user to quickly assess the "Health" of both their own fleet and the enemy's, helping them decide which ships to hunt next.
 
