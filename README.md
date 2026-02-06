@@ -13,7 +13,7 @@ The application is specifically targeted toward strategy enthusiasts and casual 
 - [User Experience (UX)](#user-experience-ux)
 - [Design](#Design)
 - [Technologies Used](#technologies-used)
-  [Testing & Logic Validation](#testing-logic-validation)
+- [Testing & Logic Validation](#testing-logic-validation)
 - [Deployment](#Deployment) 
 - [Credits](#Credits) 
 
