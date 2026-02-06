@@ -44,17 +44,23 @@ The application is specifically targeted toward strategy enthusiasts and casual 
 
 * Value: Provides the user with total control over their defensive strategy, ensuring every game starts with a unique setup tailored to their playstyle.
 
+<img width="260" height="472" alt="Screenshot 2026-02-06 at 22 45 35" src="https://github.com/user-attachments/assets/ed45c650-99ec-44b0-ae9e-b79d00b7deb2" />
+
 #### Dynamic Ship Rotation
 
 * Implemented via a dedicated "Rotate" button, this feature toggles the placement orientation between horizontal and vertical.
 
 * Value: Offers deeper tactical flexibility, allowing users to fit ships into tight spaces or create complex patterns to confuse the AI.
 
+<img width="206" height="52" alt="Screenshot 2026-02-06 at 22 46 14" src="https://github.com/user-attachments/assets/4e546579-7173-42ef-91a3-683bafe8c130" />
+
 #### Interactive Dual-Grid Interface
 
 * The game features two high-fidelity grids: "Friendly Waters" for fleet management and "Hostile Waters" for offensive strikes.
 
 * Value: The clear visual separation helps the user focus on the two different phases of the game—defense and offense—without cluttering the screen.
+
+<img width="795" height="451" alt="Screenshot 2026-02-06 at 22 45 47" src="https://github.com/user-attachments/assets/ec3dad6a-63c3-44f6-b988-bac6cf747eab" />
 
 #### Real-Time Combat Feedback & Animations
 
@@ -68,17 +74,24 @@ The application is specifically targeted toward strategy enthusiasts and casual 
 
 * Value: Allows the user to quickly assess the "Health" of both their own fleet and the enemy's, helping them decide which ships to hunt next.
 
+<img width="403" height="277" alt="Screenshot 2026-02-06 at 22 46 37" src="https://github.com/user-attachments/assets/590c38c4-a158-452f-a55b-dd6838508267" />
+
 ####  Fully Responsive Mobile Design
 
 * The layout dynamically adjusts using CSS Media Queries to ensure the grids remain playable on smaller screens like iPhones.
 
 * Value: Crucial for our target audience of casual gamers, allowing them to play a high-quality strategy game on the go without losing UI functionality.
 
+<img width="942" height="534" alt="Screenshot 2026-02-03 at 23 52 49" src="https://github.com/user-attachments/assets/39928550-ce1a-4766-958c-a2aa9646f385" />
+
 #### Integrated Audio Controller
 
 * A custom music toggle with a browser-safe "unlocker" that allows users to enable or disable the cinematic soundtrack.
 
 * Value: Enhances the immersive atmosphere of naval warfare while giving the user control over their environment (e.g., playing silently in public).
+
+<img width="134" height="52" alt="Screenshot 2026-02-06 at 22 46 51" src="https://github.com/user-attachments/assets/ad59b53b-deeb-42fc-a0a3-791af723191c" />
+<img width="137" height="53" alt="Screenshot 2026-02-06 at 22 46 58" src="https://github.com/user-attachments/assets/90f48d38-e36d-447a-b0a4-45a33c29b42a" />
 
 #### Features Left to Implement
 
@@ -115,6 +128,8 @@ The application is specifically targeted toward strategy enthusiasts and casual 
 
 #### User Stories
 * As a first-time visitor, I want to intuitively understand how to place my ships so I can start the game without reading a long tutorial.
+
+<img width="125" height="52" alt="Screenshot 2026-02-06 at 22 53 16" src="https://github.com/user-attachments/assets/2e6ef47e-f043-4056-8883-0cea7422bb22" />
 
 * As a player, I want to feel the impact of my strikes through visual and audio feedback so the game feels exciting and rewarding.
 
@@ -244,7 +259,12 @@ The Fix: I learned that browsers require a "user gesture" (like a click) before 
 * Code Analysis (JSHint) The JavaScript logic was validated using JSHint.Warnings: 0,Largest Function: 14 statements,Cyclomatic Complexity: 10 (Within professional industry standards)
 Result: The code is highly modular with a low complexity median, ensuring maintainability and performance.
 
+<img width="1097" height="220" alt="Screenshot 2026-02-04 at 02 52 15" src="https://github.com/user-attachments/assets/10271572-5db5-4a9f-9d63-8f1e37885788" />
+
 * W3C Validators: Both the HTML and CSS were run through official validators to ensure there were no broken tags or syntax errors.
+
+<img width="1685" height="709" alt="Screenshot 2026-02-04 at 02 52 32" src="https://github.com/user-attachments/assets/e7ecdf7d-9641-43eb-b5f3-d53841dafdd1" />
+<img width="1727" height="305" alt="Screenshot 2026-02-04 at 02 52 47" src="https://github.com/user-attachments/assets/f003a554-d629-4e69-a209-fb2c38c4acc7" />
 
 * PEP8: The Python code in run.py was formatted to follow PEP8 standards, keeping the backend as professional as the frontend.
 
