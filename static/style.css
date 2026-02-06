@@ -34,7 +34,6 @@ body {
 .cell.ship { background: var(--player); }
 .cell.hit { background: var(--enemy); }
 
-/* FIXED MISS STYLE: Visible blue-slate background with a center dot */
 .cell.miss { 
     background: #1e293b; 
     display: flex;
@@ -57,7 +56,6 @@ body {
 .status-indicator { font-size: 0.8rem; padding: 5px; margin-bottom: 5px; background: #1e293b; border-radius: 4px; }
 .status-indicator.sunk { color: #fca5a5; text-decoration: line-through; border: 1px solid var(--enemy); font-weight: bold; }
 
-/* ANIMATIONS */
 @keyframes shake {
     0%, 100% { transform: translate(0,0); }
     25% { transform: translate(4px, 4px); }
