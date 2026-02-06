@@ -159,7 +159,7 @@ Text/Overlays,High-Viz White,#ffffff,Maximum readability for HUD stats and alert
 <img width="152" height="56" alt="Screenshot 2025-12-30 at 22 35 51" src="https://github.com/user-attachments/assets/e2b79cd8-d7b3-432f-b02e-955080f0606a" />
 
 #### Typography
-* I used the 'Nunito' font family from[Google Fonts](https://fonts.google.com/) for this project. While the game has a military theme, I chose 'Nunito' because its clean, rounded style provides the clarity of a modern digital display (HUD) without feeling dated.Hierarchy: I used extra-bold weights (800) for headers to mimic "Classification" titles found on military documents.Legibility: Medium weights were used for buttons and grid coordinates to ensure the user can make split-second tactical decisions on any device size.
+* I used the 'Nunito' font family from [Google Fonts](https://fonts.google.com/) for this project. While the game has a military theme, I chose 'Nunito' because its clean, rounded style provides the clarity of a modern digital display (HUD) without feeling dated.Hierarchy: I used extra-bold weights (800) for headers to mimic "Classification" titles found on military documents.Legibility: Medium weights were used for buttons and grid coordinates to ensure the user can make split-second tactical decisions on any device size.
 
 <img width="193" height="51" alt="Screenshot 2025-12-30 at 22 35 05" src="https://github.com/user-attachments/assets/050b1f72-2887-4fc8-8fe1-48bc90be18df" />
 
