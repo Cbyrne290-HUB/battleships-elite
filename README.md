@@ -10,10 +10,10 @@ The application is specifically targeted toward strategy enthusiasts and casual 
 
 - [Project Overview](#Project-Overview)
 - [Features](#Features)
-- [User Experience (UX)](#User Experience (UX))
+- [User Experience (UX)](#user-experience-ux)
 - [Design](#Design)
-- [Technologies Used](#Technologies Used) 
-- [Testing & Logic Validation](#Testing & Logic Validation) 
+- [Technologies Used](#technologies-used)
+  [Testing & Logic Validation](#testing-logic-validation)
 - [Deployment](#Deployment) 
 - [Credits](#Credits) 
 
