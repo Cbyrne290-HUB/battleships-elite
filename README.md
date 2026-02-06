@@ -13,7 +13,7 @@ The application is specifically targeted toward strategy enthusiasts and casual 
 - [User Experience (UX)](#user-experience-ux)
 - [Design](#Design)
 - [Technologies Used](#technologies-used)
-- [Testing & Logic Validation](#testing-&-logic-validation)
+- [Testing & Logic Validation](#testing-and-logic-validation)
 - [Deployment](#Deployment) 
 - [Credits](#Credits) 
 
@@ -215,7 +215,7 @@ Google Lighthouse: Used throughout development to audit and optimize performance
 
 <img width="455" height="225" alt="Screenshot 2026-02-04 at 01 52 49" src="https://github.com/user-attachments/assets/7dcf7082-48ae-4fbf-8b68-c5167075bfbf" />
 
-## Testing & Logic Validation
+## Testing and Logic Validation
 #### Design Philosophy
 * When I started building Battleships Elite, my goal was to create a game that felt "snappy" and responsive. I wanted the transition from placing ships to fighting the AI to be seamless. Most of my testing time was spent in the browser console, making sure that when a user clicks a coordinate, the game knows exactly which fleet is being hit and updates the health bars instantly.
 
