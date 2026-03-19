@@ -1,14 +1,14 @@
 import random
 import os
-import gspread
-from google.oauth2.service_account import Credentials
+import json
+from colorama import init, Fore, Style
 
-# ─── Google Sheets Setup ───────────────────────────────────────────────────────
+# Initialise colorama for cross-platform terminal colour support
+init(autoreset=True)
 
-SCOPE = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive.file",
-]
+# ─── Constants ─────────────────────────────────────────────────────────────────
+
+SCORES_FILE = "scores.json"
 
 SHIPS = {
     "Carrier": 5,
@@ -21,56 +21,59 @@ SHIPS = {
 BOARD_SIZE = 10
 
 
-def connect_to_sheets():
+# ─── Scores / Data ─────────────────────────────────────────────────────────────
+
+
+def load_scores():
     """
-    Connect to Google Sheets using service account credentials.
-    Returns the worksheet or None if connection fails.
+    Load scores from the local JSON file.
+    Returns a list of score records, or empty list if file doesn't exist.
     """
+    if not os.path.exists(SCORES_FILE):
+        return []
     try:
-        creds = Credentials.from_service_account_file("creds.json", scopes=SCOPE)
-        client = gspread.authorize(creds)
-        sheet = client.open("battleships_scores").sheet1
-        return sheet
-    except Exception as e:
-        print(f"[INFO] Could not connect to Google Sheets: {e}")
-        return None
+        with open(SCORES_FILE, "r") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return []
 
 
-def log_score(sheet, player_name, result, turns):
+def save_score(player_name, result, turns):
     """
-    Log the game result to Google Sheets.
-    Appends a row with player name, result, and number of turns taken.
+    Append a new score record to the local JSON file.
+    Each record stores the player name, result, and number of turns.
     """
-    if sheet is None:
+    scores = load_scores()
+    scores.append({
+        "player": player_name,
+        "result": result,
+        "turns": turns
+    })
+    try:
+        with open(SCORES_FILE, "w") as f:
+            json.dump(scores, f, indent=2)
+        print(Fore.GREEN + "\n✓ Score saved to leaderboard!")
+    except IOError as e:
+        print(Fore.YELLOW + f"[INFO] Could not save score: {e}")
+
+
+def get_leaderboard():
+    """
+    Load and display all scores from the JSON file.
+    Sorted by turns ascending so fewest turns shows first.
+    """
+    scores = load_scores()
+    if not scores:
+        print(Fore.YELLOW + "\nNo scores yet. Play a game first!\n")
         return
-    try:
-        sheet.append_row([player_name, result, turns])
-        print("\n✓ Score saved to leaderboard!")
-    except Exception as e:
-        print(f"[INFO] Could not save score: {e}")
-
-
-def get_leaderboard(sheet):
-    """
-    Fetch and display all scores from Google Sheets.
-    """
-    if sheet is None:
-        print("Leaderboard unavailable (no Sheets connection).")
-        return
-    try:
-        records = sheet.get_all_values()
-        if not records:
-            print("No scores yet.")
-            return
-        print("\n── LEADERBOARD ──────────────────────")
-        print(f"{'Player':<15} {'Result':<10} {'Turns'}")
-        print("─" * 35)
-        for row in records:
-            if len(row) >= 3:
-                print(f"{row[0]:<15} {row[1]:<10} {row[2]}")
-        print("─" * 35)
-    except Exception as e:
-        print(f"[INFO] Could not fetch leaderboard: {e}")
+    sorted_scores = sorted(scores, key=lambda x: x["turns"])
+    print(Fore.CYAN + "\n── LEADERBOARD ──────────────────────")
+    print(f"{'Player':<15} {'Result':<10} {'Turns'}")
+    print("─" * 35)
+    for record in sorted_scores:
+        colour = Fore.GREEN if record["result"] == "WIN" else Fore.RED
+        print(colour + f"{record['player']:<15} {record['result']:<10} {record['turns']}")
+    print(Fore.CYAN + "─" * 35 + "\n")
 
 
 # ─── Board Helpers ─────────────────────────────────────────────────────────────
@@ -83,27 +86,33 @@ def make_board():
 
 def print_board(board, hide_ships=False):
     """
-    Print a board to the terminal.
+    Print a board to the terminal with coloured cells.
     If hide_ships is True, ship cells ('S') are shown as water ('~').
     """
     col_labels = "  " + " ".join(str(i) for i in range(BOARD_SIZE))
-    print(col_labels)
+    print(Fore.CYAN + col_labels)
     for idx, row in enumerate(board):
         display = []
         for cell in row:
             if hide_ships and cell == "S":
-                display.append("~")
+                display.append(Fore.BLUE + "~")
+            elif cell == "S":
+                display.append(Fore.GREEN + "S")
+            elif cell == "X":
+                display.append(Fore.RED + "X")
+            elif cell == "O":
+                display.append(Fore.WHITE + "O")
             else:
-                display.append(cell)
-        print(f"{idx} " + " ".join(display))
+                display.append(Fore.BLUE + "~")
+        print(Fore.CYAN + f"{idx} " + " ".join(display))
 
 
 def print_both_boards(player_board, computer_board):
-    """Print player and computer boards side by side."""
+    """Print player and computer boards in the terminal."""
     os.system("cls" if os.name == "nt" else "clear")
-    print("\n── YOUR BOARD ───────────────────────")
+    print(Fore.GREEN + "\n── YOUR BOARD ───────────────────────")
     print_board(player_board)
-    print("\n── ENEMY WATERS ─────────────────────")
+    print(Fore.RED + "\n── ENEMY WATERS ─────────────────────")
     print_board(computer_board, hide_ships=True)
     print()
 
@@ -122,7 +131,7 @@ def validate_coordinates(row, col):
 def can_place_ship(board, row, col, length, horizontal):
     """
     Check whether a ship of given length fits at (row, col).
-    Returns True if placement is valid.
+    Returns True if placement is valid with no overlaps or boundary issues.
     """
     for i in range(length):
         r = row if horizontal else row + i
@@ -145,7 +154,7 @@ def place_ship_on_board(board, row, col, length, horizontal, marker="S"):
 def place_computer_ships(board):
     """
     Randomly place all ships for the computer.
-    Uses a while loop to retry until each ship is placed successfully.
+    Uses a while loop to retry until each ship is successfully placed.
     """
     for ship_name, length in SHIPS.items():
         placed = False
@@ -164,57 +173,57 @@ def get_orientation():
     Returns True for horizontal, False for vertical.
     """
     while True:
-        choice = input("Orientation? (h)orizontal / (v)ertical: ").strip().lower()
+        choice = input("  Orientation? (h)orizontal / (v)ertical: ").strip().lower()
         if choice in ("h", "horizontal"):
             return True
         elif choice in ("v", "vertical"):
             return False
         else:
-            print("Invalid input. Enter 'h' or 'v'.")
+            print(Fore.RED + "  ✗ Invalid input. Enter 'h' or 'v'.")
 
 
-def get_placement_coordinates(ship_name, length, horizontal):
+def get_placement_coordinates():
     """
     Prompt the player for valid row and column to place a ship.
-    Validates input type and range.
+    Validates input type and range before returning.
     """
     while True:
         try:
-            row = int(input(f"  Row (0-9): ").strip())
-            col = int(input(f"  Col (0-9): ").strip())
+            row = int(input("  Row (0-9): ").strip())
+            col = int(input("  Col (0-9): ").strip())
             if not validate_coordinates(row, col):
-                print("  ✗ Out of range. Row and col must be between 0 and 9.")
+                print(Fore.RED + "  ✗ Out of range. Row and col must be between 0 and 9.")
                 continue
             return row, col
         except ValueError:
-            print("  ✗ Invalid input. Please enter numbers only.")
+            print(Fore.RED + "  ✗ Invalid input. Please enter numbers only.")
 
 
 def player_place_ships(board):
     """
     Walk the player through placing all 5 ships manually.
     Validates each placement before confirming.
-    Ships must all be placed before the game can begin.
+    The game cannot begin until all ships are placed.
     """
-    print("\n── PLACE YOUR FLEET ─────────────────")
+    print(Fore.CYAN + "\n── PLACE YOUR FLEET ─────────────────")
     print("Coordinates: row 0-9, col 0-9\n")
 
     for ship_name, length in SHIPS.items():
         placed = False
         while not placed:
             print_board(board)
-            print(f"\nPlacing: {ship_name} (length {length})")
+            print(Fore.YELLOW + f"\nPlacing: {ship_name} (length {length})")
             horizontal = get_orientation()
-            row, col = get_placement_coordinates(ship_name, length, horizontal)
+            row, col = get_placement_coordinates()
 
             if can_place_ship(board, row, col, length, horizontal):
                 place_ship_on_board(board, row, col, length, horizontal)
-                print(f"  ✓ {ship_name} placed!\n")
+                print(Fore.GREEN + f"  ✓ {ship_name} placed!\n")
                 placed = True
             else:
-                print("  ✗ Cannot place ship there — overlap or out of bounds. Try again.\n")
+                print(Fore.RED + "  ✗ Cannot place there — overlap or out of bounds. Try again.\n")
 
-    print("\n✓ All ships placed. Preparing for battle...\n")
+    print(Fore.GREEN + "\n✓ All ships placed. Preparing for battle...\n")
 
 
 # ─── Combat ────────────────────────────────────────────────────────────────────
@@ -230,32 +239,32 @@ def get_shot_coordinates(shots_taken):
             row = int(input("Fire at row (0-9): ").strip())
             col = int(input("Fire at col (0-9): ").strip())
             if not validate_coordinates(row, col):
-                print("✗ Out of range. Enter values between 0 and 9.")
+                print(Fore.RED + "✗ Out of range. Enter values between 0 and 9.")
                 continue
             if (row, col) in shots_taken:
-                print("✗ You already fired there. Choose a different target.")
+                print(Fore.RED + "✗ Already fired there. Choose a different target.")
                 continue
             return row, col
         except ValueError:
-            print("✗ Invalid input. Numbers only.")
+            print(Fore.RED + "✗ Invalid input. Numbers only.")
 
 
 def player_turn(computer_hidden_board, computer_display_board, shots_taken):
     """
     Handle the player's turn.
-    Updates both the hidden board (for ship tracking) and display board.
+    Updates both the hidden board (ship tracking) and display board.
     Returns True if all computer ships are sunk.
     """
-    print("── YOUR TURN ────────────────────────")
+    print(Fore.CYAN + "── YOUR TURN ────────────────────────")
     row, col = get_shot_coordinates(shots_taken)
     shots_taken.add((row, col))
 
     if computer_hidden_board[row][col] == "S":
-        print("💥 HIT!")
+        print(Fore.RED + "💥 HIT!")
         computer_hidden_board[row][col] = "X"
         computer_display_board[row][col] = "X"
     else:
-        print("🌊 MISS!")
+        print(Fore.BLUE + "🌊 MISS!")
         computer_hidden_board[row][col] = "M"
         computer_display_board[row][col] = "O"
 
@@ -281,10 +290,10 @@ def computer_turn(player_board, computer_shots):
     computer_shots.add((row, col))
 
     if player_board[row][col] == "S":
-        print(f"💥 Enemy hit your ship at ({row}, {col})!")
+        print(Fore.RED + f"💥 Enemy hit your ship at ({row}, {col})!")
         player_board[row][col] = "X"
     else:
-        print(f"🌊 Enemy missed at ({row}, {col}).")
+        print(Fore.BLUE + f"🌊 Enemy missed at ({row}, {col}).")
         player_board[row][col] = "O"
 
     return all(
@@ -303,12 +312,12 @@ def get_player_name():
         name = input("Enter your name, commander: ").strip()
         if name:
             return name
-        print("✗ Name cannot be empty.")
+        print(Fore.RED + "✗ Name cannot be empty.")
 
 
-def play_game(sheet):
+def play_game():
     """
-    Main game loop. Manages turn order, win conditions, and score logging.
+    Main game loop. Manages turn order, win conditions, and score saving.
     """
     player_name = get_player_name()
 
@@ -323,60 +332,57 @@ def play_game(sheet):
     computer_shots = set()
     turns = 0
 
-    print("\n⚓ BATTLE STATIONS! The fight begins...\n")
+    print(Fore.YELLOW + "\n⚓ BATTLE STATIONS! The fight begins...\n")
 
     while True:
         print_both_boards(player_board, computer_display_board)
         turns += 1
 
-        # Player turn
         player_won = player_turn(
             computer_hidden_board, computer_display_board, player_shots
         )
         if player_won:
             print_both_boards(player_board, computer_display_board)
-            print(f"\n🏆 VICTORY, {player_name}! You sank the enemy fleet in {turns} turns!\n")
-            log_score(sheet, player_name, "WIN", turns)
+            print(Fore.GREEN + Style.BRIGHT + f"\n🏆 VICTORY, {player_name}! You sank the enemy fleet in {turns} turns!\n")
+            save_score(player_name, "WIN", turns)
             break
 
-        # Computer turn
         computer_won = computer_turn(player_board, computer_shots)
         if computer_won:
             print_both_boards(player_board, computer_display_board)
-            print(f"\n💀 DEFEAT, {player_name}. The enemy sank your fleet.\n")
-            log_score(sheet, player_name, "LOSS", turns)
+            print(Fore.RED + Style.BRIGHT + f"\n💀 DEFEAT, {player_name}. The enemy sank your fleet.\n")
+            save_score(player_name, "LOSS", turns)
             break
 
 
-def main_menu(sheet):
+def main_menu():
     """
     Display the main menu and handle user selection.
     Loops until the player chooses to quit.
     """
     while True:
-        print("\n══════════════════════════════════════")
-        print("         BATTLESHIPS ELITE CLI        ")
-        print("══════════════════════════════════════")
-        print("  1. New Game")
-        print("  2. Leaderboard")
-        print("  3. Quit")
-        print("──────────────────────────────────────")
+        print(Fore.CYAN + Style.BRIGHT + "\n══════════════════════════════════════")
+        print(Fore.CYAN + Style.BRIGHT + "         BATTLESHIPS ELITE CLI        ")
+        print(Fore.CYAN + Style.BRIGHT + "══════════════════════════════════════")
+        print(Fore.WHITE + "  1. New Game")
+        print(Fore.WHITE + "  2. Leaderboard")
+        print(Fore.WHITE + "  3. Quit")
+        print(Fore.CYAN + "──────────────────────────────────────")
 
         choice = input("Select an option (1-3): ").strip()
 
         if choice == "1":
-            play_game(sheet)
+            play_game()
         elif choice == "2":
-            get_leaderboard(sheet)
+            get_leaderboard()
         elif choice == "3":
-            print("\nFarewell, commander. ⚓\n")
+            print(Fore.YELLOW + "\nFarewell, commander. ⚓\n")
             break
         else:
-            print("✗ Invalid option. Enter 1, 2, or 3.")
+            print(Fore.RED + "✗ Invalid option. Enter 1, 2, or 3.")
 
 
 # ─── Entry Point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    sheet = connect_to_sheets()
-    main_menu(sheet)
+    main_menu()
