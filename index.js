@@ -1,30 +1,36 @@
-// ===================================================
-// Total.js start script
-// https://www.totaljs.com
-// ===================================================
+const express = require('express');
+const app = express();
+const { spawn } = require('child_process');
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 
-const options = {};
+app.use(express.static('views'));
 
-// options.ip = '127.0.0.1';
-options.port = parseInt(process.env.PORT);
-// options.unixsocket = require('path').join(require('os').tmpdir(), 'app_name');
-// options.config = { name: 'Total.js' };
-// options.sleep = 3000;
-// options.inspector = 9229;
-// options.watch = ['private'];
-// options.livereload = 'https://yourhostname';
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/views/index.html');
+});
 
-// Enables cluster:
-// options.cluster = 'auto';
-// options.cluster_limit = 10; // max 10. threads (works only with "auto" scaling)
+io.on('connection', (socket) => {
+    const game = spawn('python3', ['run.py']);
 
-// Enables threads:
-// options.cluster = 'auto';
-// options.cluster_limit = 10; // max 10. threads (works only with "auto" scaling)
-// options.timeout = 5000;
-// options.threads = '/api/';
-// options.logs = 'isolated';
+    game.stdout.on('data', (data) => {
+        socket.emit('output', data.toString());
+    });
 
-var type = process.argv.indexOf('--release', 1) !== -1 || process.argv.indexOf('release', 1) !== -1 ? 'release' : 'debug';
-// require('total4/' + type)(options);
-require('total4').http('release', options);
+    game.stderr.on('data', (data) => {
+        socket.emit('output', data.toString());
+    });
+
+    socket.on('input', (data) => {
+        game.stdin.write(data + '\n');
+    });
+
+    game.on('close', () => {
+        socket.emit('output', '\r\nGame over. Refresh to play again.\r\n');
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
