@@ -6,7 +6,7 @@ from colorama import init, Fore, Style
 # Initialise colorama for cross-platform terminal colour support
 init(autoreset=True)
 
-# ─── Constants ─────────────────────────────────────────────────────────────────
+# --- Constants ---
 
 SCORES_FILE = "scores.json"
 ROW_LABELS = "ABCDEFGHIJ"
@@ -22,13 +22,14 @@ SHIPS = {
 BOARD_SIZE = 10
 
 
-# ─── Scores / Data ─────────────────────────────────────────────────────────────
+# --- Scores / Data ---
 
 
 def load_scores():
     """
     Load scores from the local JSON file.
-    Returns a list of score records, or empty list if file doesn't exist.
+    Returns a list of score records, or empty list if file
+    doesn't exist.
     """
     if not os.path.exists(SCORES_FILE):
         return []
@@ -42,7 +43,7 @@ def load_scores():
 def save_score(player_name, result, turns):
     """
     Append a new score record to the local JSON file.
-    Each record stores the player name, result, and number of turns.
+    Each record stores the player name, result, and turns.
     """
     scores = load_scores()
     scores.append({
@@ -73,11 +74,16 @@ def get_leaderboard():
     print("─" * 35)
     for record in sorted_scores:
         colour = Fore.GREEN if record["result"] == "WIN" else Fore.RED
-        print(colour + f"{record['player']:<15} {record['result']:<10} {record['turns']}")
+        print(
+            colour +
+            f"{record['player']:<15} "
+            f"{record['result']:<10} "
+            f"{record['turns']}"
+        )
     print(Fore.CYAN + "─" * 35 + "\n")
 
 
-# ─── Board Helpers ─────────────────────────────────────────────────────────────
+# --- Board Helpers ---
 
 
 def make_board():
@@ -87,13 +93,15 @@ def make_board():
 
 def print_board(board, hide_ships=False):
     """
-    Print a board to the terminal with coloured cells and wider spacing.
+    Print a board to the terminal with coloured cells.
     Rows are labelled A-J, columns 0-9.
-    If hide_ships is True, ship cells ('S') are shown as water ('~').
+    If hide_ships is True, ship cells shown as water.
     """
-    col_labels = "     " + "   ".join(str(i) for i in range(BOARD_SIZE))
+    col_labels = "     " + "   ".join(
+        str(i) for i in range(BOARD_SIZE)
+    )
     print(Fore.CYAN + col_labels)
-    print(Fore.CYAN + "   " + "─" * 39)
+    print(Fore.CYAN + "   " + "-" * 39)
     for idx, row in enumerate(board):
         display = []
         for cell in row:
@@ -107,21 +115,24 @@ def print_board(board, hide_ships=False):
                 display.append(Fore.WHITE + "O")
             else:
                 display.append(Fore.BLUE + "~")
-        print(Fore.CYAN + f" {ROW_LABELS[idx]} | " + "   ".join(display))
-    print(Fore.CYAN + "   " + "─" * 39)
+        print(
+            Fore.CYAN + f" {ROW_LABELS[idx]} | " +
+            "   ".join(display)
+        )
+    print(Fore.CYAN + "   " + "-" * 39)
 
 
 def print_both_boards(player_board, computer_board):
     """Print player and computer boards in the terminal."""
     os.system("cls" if os.name == "nt" else "clear")
-    print(Fore.GREEN + "\n── YOUR BOARD ───────────────────────────────")
+    print(Fore.GREEN + "\n-- YOUR BOARD --")
     print_board(player_board)
-    print(Fore.RED + "\n── ENEMY WATERS ─────────────────────────────")
+    print(Fore.RED + "\n-- ENEMY WATERS --")
     print_board(computer_board, hide_ships=True)
     print()
 
 
-# ─── Ship Placement ────────────────────────────────────────────────────────────
+# --- Ship Placement ---
 
 
 def validate_coordinates(row, col):
@@ -135,7 +146,7 @@ def validate_coordinates(row, col):
 def can_place_ship(board, row, col, length, horizontal):
     """
     Check whether a ship of given length fits at (row, col).
-    Returns True if placement is valid with no overlaps or boundary issues.
+    Returns True if placement is valid.
     """
     for i in range(length):
         r = row if horizontal else row + i
@@ -147,8 +158,9 @@ def can_place_ship(board, row, col, length, horizontal):
     return True
 
 
-def place_ship_on_board(board, row, col, length, horizontal, marker="S"):
-    """Place a ship on the board by marking cells with the given marker."""
+def place_ship_on_board(board, row, col, length, horizontal,
+                        marker="S"):
+    """Place a ship on the board by marking cells with marker."""
     for i in range(length):
         r = row if horizontal else row + i
         c = col + i if horizontal else col
@@ -158,7 +170,7 @@ def place_ship_on_board(board, row, col, length, horizontal, marker="S"):
 def place_computer_ships(board):
     """
     Randomly place all ships for the computer.
-    Uses a while loop to retry until each ship is successfully placed.
+    Uses a while loop to retry until each ship is placed.
     """
     for ship_name, length in SHIPS.items():
         placed = False
@@ -167,7 +179,9 @@ def place_computer_ships(board):
             row = random.randint(0, BOARD_SIZE - 1)
             col = random.randint(0, BOARD_SIZE - 1)
             if can_place_ship(board, row, col, length, horizontal):
-                place_ship_on_board(board, row, col, length, horizontal)
+                place_ship_on_board(
+                    board, row, col, length, horizontal
+                )
                 placed = True
 
 
@@ -177,35 +191,45 @@ def get_orientation():
     Returns True for horizontal, False for vertical.
     """
     while True:
-        choice = input("  Orientation? (h)orizontal / (v)ertical: ").strip().lower()
+        choice = input(
+            "  Orientation? (h)orizontal / (v)ertical: "
+        ).strip().lower()
         if choice in ("h", "horizontal"):
             return True
         elif choice in ("v", "vertical"):
             return False
         else:
-            print(Fore.RED + "  ✗ Invalid input. Enter 'h' or 'v'.")
+            print(Fore.RED + "  ✗ Invalid. Enter 'h' or 'v'.")
 
 
 def get_placement_coordinates():
     """
     Prompt the player for valid row and column to place a ship.
     Row is entered as A-J, column as 0-9.
-    Validates input type and range before returning.
     """
     while True:
         try:
             row_input = input("  Row (A-J): ").strip().upper()
             if row_input not in ROW_LABELS:
-                print(Fore.RED + "  ✗ Invalid row. Enter a letter from A to J.")
+                print(
+                    Fore.RED +
+                    "  ✗ Invalid row. Enter a letter A to J."
+                )
                 continue
             row = ROW_LABELS.index(row_input)
             col = int(input("  Col (0-9): ").strip())
             if not validate_coordinates(row, col):
-                print(Fore.RED + "  ✗ Out of range. Col must be between 0 and 9.")
+                print(
+                    Fore.RED +
+                    "  ✗ Out of range. Col must be 0 to 9."
+                )
                 continue
             return row, col
         except ValueError:
-            print(Fore.RED + "  ✗ Invalid input. Please enter a letter for row and number for col.")
+            print(
+                Fore.RED +
+                "  ✗ Invalid. Letter for row, number for col."
+            )
 
 
 def player_place_ships(board):
@@ -221,52 +245,76 @@ def player_place_ships(board):
         placed = False
         while not placed:
             print_board(board)
-            print(Fore.YELLOW + f"\nPlacing: {ship_name} (length {length})")
+            print(
+                Fore.YELLOW +
+                f"\nPlacing: {ship_name} (length {length})"
+            )
             horizontal = get_orientation()
             row, col = get_placement_coordinates()
 
             if can_place_ship(board, row, col, length, horizontal):
-                place_ship_on_board(board, row, col, length, horizontal)
+                place_ship_on_board(
+                    board, row, col, length, horizontal
+                )
                 print(Fore.GREEN + f"  ✓ {ship_name} placed!\n")
                 placed = True
             else:
-                print(Fore.RED + "  ✗ Cannot place there — overlap or out of bounds. Try again.\n")
+                print(
+                    Fore.RED +
+                    "  ✗ Cannot place there — overlap or "
+                    "out of bounds. Try again.\n"
+                )
 
-    print(Fore.GREEN + "\n✓ All ships placed. Preparing for battle...\n")
+    print(Fore.GREEN + "\n✓ All ships placed. Preparing...\n")
 
 
-# ─── Combat ────────────────────────────────────────────────────────────────────
+# --- Combat ---
 
 
 def get_shot_coordinates(shots_taken):
     """
     Prompt the player for a valid shot coordinate.
     Row entered as A-J, column as 0-9.
-    Rejects invalid input, out-of-range values, and duplicate shots.
+    Rejects invalid input and duplicate shots.
     """
     while True:
         try:
-            row_input = input("Fire at row (A-J): ").strip().upper()
+            row_input = input(
+                "Fire at row (A-J): "
+            ).strip().upper()
             if row_input not in ROW_LABELS:
-                print(Fore.RED + "✗ Invalid row. Enter a letter from A to J.")
+                print(
+                    Fore.RED +
+                    "✗ Invalid row. Enter a letter A to J."
+                )
                 continue
             row = ROW_LABELS.index(row_input)
             col = int(input("Fire at col (0-9): ").strip())
             if not validate_coordinates(row, col):
-                print(Fore.RED + "✗ Out of range. Col must be between 0 and 9.")
+                print(
+                    Fore.RED +
+                    "✗ Out of range. Col must be 0 to 9."
+                )
                 continue
             if (row, col) in shots_taken:
-                print(Fore.RED + "✗ Already fired there. Choose a different target.")
+                print(
+                    Fore.RED +
+                    "✗ Already fired there. Choose another."
+                )
                 continue
             return row, col
         except ValueError:
-            print(Fore.RED + "✗ Invalid input. Letter for row, number for col.")
+            print(
+                Fore.RED +
+                "✗ Invalid. Letter for row, number for col."
+            )
 
 
-def player_turn(computer_hidden_board, computer_display_board, shots_taken):
+def player_turn(computer_hidden_board, computer_display_board,
+                shots_taken):
     """
     Handle the player's turn.
-    Updates both the hidden board (ship tracking) and display board.
+    Updates both the hidden board and display board.
     Returns True if all computer ships are sunk.
     """
     print(Fore.CYAN + "── YOUR TURN ────────────────────────")
@@ -305,7 +353,10 @@ def computer_turn(player_board, computer_shots):
     row_label = ROW_LABELS[row]
 
     if player_board[row][col] == "S":
-        print(Fore.RED + f"💥 Enemy hit your ship at {row_label}{col}!")
+        print(
+            Fore.RED +
+            f"💥 Enemy hit your ship at {row_label}{col}!"
+        )
         player_board[row][col] = "X"
     else:
         print(Fore.BLUE + f"🌊 Enemy missed at {row_label}{col}.")
@@ -318,7 +369,7 @@ def computer_turn(player_board, computer_shots):
     )
 
 
-# ─── Game Flow ─────────────────────────────────────────────────────────────────
+# --- Game Flow ---
 
 
 def get_player_name():
@@ -332,7 +383,8 @@ def get_player_name():
 
 def play_game():
     """
-    Main game loop. Manages turn order, win conditions, and score saving.
+    Main game loop.
+    Manages turn order, win conditions, and score saving.
     """
     player_name = get_player_name()
 
@@ -354,18 +406,28 @@ def play_game():
         turns += 1
 
         player_won = player_turn(
-            computer_hidden_board, computer_display_board, player_shots
+            computer_hidden_board,
+            computer_display_board,
+            player_shots
         )
         if player_won:
             print_both_boards(player_board, computer_display_board)
-            print(Fore.GREEN + Style.BRIGHT + f"\n🏆 VICTORY, {player_name}! You sank the enemy fleet in {turns} turns!\n")
+            print(
+                Fore.GREEN + Style.BRIGHT +
+                f"\n🏆 VICTORY, {player_name}! "
+                f"You sank the fleet in {turns} turns!\n"
+            )
             save_score(player_name, "WIN", turns)
             break
 
         computer_won = computer_turn(player_board, computer_shots)
         if computer_won:
             print_both_boards(player_board, computer_display_board)
-            print(Fore.RED + Style.BRIGHT + f"\n💀 DEFEAT, {player_name}. The enemy sank your fleet.\n")
+            print(
+                Fore.RED + Style.BRIGHT +
+                f"\n💀 DEFEAT, {player_name}. "
+                f"The enemy sank your fleet.\n"
+            )
             save_score(player_name, "LOSS", turns)
             break
 
@@ -376,9 +438,12 @@ def main_menu():
     Loops until the player chooses to quit.
     """
     while True:
-        print(Fore.CYAN + Style.BRIGHT + "\n══════════════════════════════════════")
-        print(Fore.CYAN + Style.BRIGHT + "         BATTLESHIPS ELITE CLI        ")
-        print(Fore.CYAN + Style.BRIGHT + "══════════════════════════════════════")
+        print(Fore.CYAN + Style.BRIGHT +
+              "\n══════════════════════════════════════")
+        print(Fore.CYAN + Style.BRIGHT +
+              "         BATTLESHIPS ELITE CLI        ")
+        print(Fore.CYAN + Style.BRIGHT +
+              "══════════════════════════════════════")
         print(Fore.WHITE + "  1. New Game")
         print(Fore.WHITE + "  2. Leaderboard")
         print(Fore.WHITE + "  3. Quit")
@@ -397,7 +462,7 @@ def main_menu():
             print(Fore.RED + "✗ Invalid option. Enter 1, 2, or 3.")
 
 
-# ─── Entry Point ───────────────────────────────────────────────────────────────
+# --- Entry Point ---
 
 if __name__ == "__main__":
     main_menu()
