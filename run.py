@@ -9,6 +9,7 @@ init(autoreset=True)
 # ─── Constants ─────────────────────────────────────────────────────────────────
 
 SCORES_FILE = "scores.json"
+ROW_LABELS = "ABCDEFGHIJ"
 
 SHIPS = {
     "Carrier": 5,
@@ -86,11 +87,13 @@ def make_board():
 
 def print_board(board, hide_ships=False):
     """
-    Print a board to the terminal with coloured cells.
+    Print a board to the terminal with coloured cells and wider spacing.
+    Rows are labelled A-J, columns 0-9.
     If hide_ships is True, ship cells ('S') are shown as water ('~').
     """
-    col_labels = "  " + " ".join(str(i) for i in range(BOARD_SIZE))
+    col_labels = "     " + "   ".join(str(i) for i in range(BOARD_SIZE))
     print(Fore.CYAN + col_labels)
+    print(Fore.CYAN + "   " + "─" * 39)
     for idx, row in enumerate(board):
         display = []
         for cell in row:
@@ -104,15 +107,16 @@ def print_board(board, hide_ships=False):
                 display.append(Fore.WHITE + "O")
             else:
                 display.append(Fore.BLUE + "~")
-        print(Fore.CYAN + f"{idx} " + " ".join(display))
+        print(Fore.CYAN + f" {ROW_LABELS[idx]} | " + "   ".join(display))
+    print(Fore.CYAN + "   " + "─" * 39)
 
 
 def print_both_boards(player_board, computer_board):
     """Print player and computer boards in the terminal."""
     os.system("cls" if os.name == "nt" else "clear")
-    print(Fore.GREEN + "\n── YOUR BOARD ───────────────────────")
+    print(Fore.GREEN + "\n── YOUR BOARD ───────────────────────────────")
     print_board(player_board)
-    print(Fore.RED + "\n── ENEMY WATERS ─────────────────────")
+    print(Fore.RED + "\n── ENEMY WATERS ─────────────────────────────")
     print_board(computer_board, hide_ships=True)
     print()
 
@@ -185,18 +189,23 @@ def get_orientation():
 def get_placement_coordinates():
     """
     Prompt the player for valid row and column to place a ship.
+    Row is entered as A-J, column as 0-9.
     Validates input type and range before returning.
     """
     while True:
         try:
-            row = int(input("  Row (0-9): ").strip())
+            row_input = input("  Row (A-J): ").strip().upper()
+            if row_input not in ROW_LABELS:
+                print(Fore.RED + "  ✗ Invalid row. Enter a letter from A to J.")
+                continue
+            row = ROW_LABELS.index(row_input)
             col = int(input("  Col (0-9): ").strip())
             if not validate_coordinates(row, col):
-                print(Fore.RED + "  ✗ Out of range. Row and col must be between 0 and 9.")
+                print(Fore.RED + "  ✗ Out of range. Col must be between 0 and 9.")
                 continue
             return row, col
         except ValueError:
-            print(Fore.RED + "  ✗ Invalid input. Please enter numbers only.")
+            print(Fore.RED + "  ✗ Invalid input. Please enter a letter for row and number for col.")
 
 
 def player_place_ships(board):
@@ -206,7 +215,7 @@ def player_place_ships(board):
     The game cannot begin until all ships are placed.
     """
     print(Fore.CYAN + "\n── PLACE YOUR FLEET ─────────────────")
-    print("Coordinates: row 0-9, col 0-9\n")
+    print("Row: A-J  |  Col: 0-9\n")
 
     for ship_name, length in SHIPS.items():
         placed = False
@@ -232,21 +241,26 @@ def player_place_ships(board):
 def get_shot_coordinates(shots_taken):
     """
     Prompt the player for a valid shot coordinate.
-    Rejects non-integer input, out-of-range values, and duplicate shots.
+    Row entered as A-J, column as 0-9.
+    Rejects invalid input, out-of-range values, and duplicate shots.
     """
     while True:
         try:
-            row = int(input("Fire at row (0-9): ").strip())
+            row_input = input("Fire at row (A-J): ").strip().upper()
+            if row_input not in ROW_LABELS:
+                print(Fore.RED + "✗ Invalid row. Enter a letter from A to J.")
+                continue
+            row = ROW_LABELS.index(row_input)
             col = int(input("Fire at col (0-9): ").strip())
             if not validate_coordinates(row, col):
-                print(Fore.RED + "✗ Out of range. Enter values between 0 and 9.")
+                print(Fore.RED + "✗ Out of range. Col must be between 0 and 9.")
                 continue
             if (row, col) in shots_taken:
                 print(Fore.RED + "✗ Already fired there. Choose a different target.")
                 continue
             return row, col
         except ValueError:
-            print(Fore.RED + "✗ Invalid input. Numbers only.")
+            print(Fore.RED + "✗ Invalid input. Letter for row, number for col.")
 
 
 def player_turn(computer_hidden_board, computer_display_board, shots_taken):
@@ -288,12 +302,13 @@ def computer_turn(player_board, computer_shots):
             break
 
     computer_shots.add((row, col))
+    row_label = ROW_LABELS[row]
 
     if player_board[row][col] == "S":
-        print(Fore.RED + f"💥 Enemy hit your ship at ({row}, {col})!")
+        print(Fore.RED + f"💥 Enemy hit your ship at {row_label}{col}!")
         player_board[row][col] = "X"
     else:
-        print(Fore.BLUE + f"🌊 Enemy missed at ({row}, {col}).")
+        print(Fore.BLUE + f"🌊 Enemy missed at {row_label}{col}.")
         player_board[row][col] = "O"
 
     return all(
