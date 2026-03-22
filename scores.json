@@ -1,0 +1,17 @@
+[
+  {
+    "player": "Commander",
+    "result": "WIN",
+    "turns": 42
+  },
+  {
+    "player": "Admiral",
+    "result": "WIN",
+    "turns": 67
+  },
+  {
+    "player": "Captain",
+    "result": "LOSS",
+    "turns": 55
+  }
+]
