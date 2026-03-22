@@ -51,7 +51,7 @@ selections — ensuring the game never crashes on bad input.
 reads and writes scores across sessions, demonstrating real-world 
 data management.
 
-Game Logic: Designing a coordinate system using nested lists 
+* Game Logic: Designing a coordinate system using nested lists 
 that correctly handles ship placement, overlap detection, 
 boundary checking, and hit/miss tracking.
 
