@@ -267,7 +267,7 @@ using the CI mock terminal template.
 
 * PEP8 Validation
 The run.py file was passed through the Code Institute PEP8 
-validator at https://pep8ci.herokuapp.com/ with zero errors.
+validator at [PEP8 Validator](https://pep8ci.herokuapp.com/) with zero errors.
 
 <img width="1725" height="1040" alt="Screenshot 2026-03-22 at 19 46 15" src="https://github.com/user-attachments/assets/dd83b718-fcbc-4421-92ac-c7d94116b12b" />
 
@@ -315,7 +315,7 @@ before each shot is accepted.
 
 #### PEP8 Validation
 The run.py file was passed through the Code Institute PEP8 
-validator at https://pep8ci.herokuapp.com/ with zero errors.
+validator at [PEP8 Validator](https://pep8ci.herokuapp.com/) with zero errors.
 
 <img width="1725" height="1040" alt="Screenshot 2026-03-22 at 19 46 15" src="https://github.com/user-attachments/assets/64fe0577-7425-4ba4-b148-af8c41ee8b1d" />
 
@@ -365,7 +365,7 @@ code hosting.
 <img width="55" height="48" alt="Screenshot 2025-12-31 at 01 17 01" src="https://github.com/user-attachments/assets/1a3a4273-5a45-4ea3-9019-6852d68e29f6" />
 
 * Libraries
-colorama: Terminal colour library — https://pypi.org/project/colorama/
+colorama: Terminal colour library — [Colorama](https://pypi.org/project/colorama/)
 
 * Acknowledgments
 A huge thanks to my college instructors for their feedback and 
