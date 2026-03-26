@@ -311,14 +311,6 @@ before each shot is accepted.
 #### Unfixed Bugs
 * There are no known unfixed bugs at the time of submission.
 
-#### Validation & Tools
-
-#### PEP8 Validation
-The run.py file was passed through the Code Institute PEP8 
-validator at [PEP8 Validator](https://pep8ci.herokuapp.com/) with zero errors.
-
-<img width="1725" height="1040" alt="Screenshot 2026-03-22 at 19 46 15" src="https://github.com/user-attachments/assets/64fe0577-7425-4ba4-b148-af8c41ee8b1d" />
-
 #### Deployment
 
 * The application was deployed to Heroku using the Code Institute 
