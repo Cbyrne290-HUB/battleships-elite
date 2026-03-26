@@ -8,7 +8,7 @@ their fleet and engage an AI opponent in turn-based combat on a
 portfolio module, with a focus on clean code structure, input 
 validation, and data handling using a JSON-based leaderboard system.
 
-<img width="942" height="534" alt="Screenshot 2026-02-03 at 23 52 49" src="https://github.com/user-attachments/assets/b242c534-8337-46b6-982b-c4086e725e77" />
+<img width="1726" height="1039" alt="Screenshot 2026-03-26 at 15 19 33" src="https://github.com/user-attachments/assets/18a4fa44-230b-4c72-993b-c9b69441742b" />
 
 ## Table of Contents
 
