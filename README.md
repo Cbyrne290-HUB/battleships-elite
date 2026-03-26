@@ -48,8 +48,8 @@ input — ship placement coordinates, shot coordinates, menu
 selections — ensuring the game never crashes on bad input.
 
 * Data Persistence: Implementing a JSON-based leaderboard that 
-reads and writes scores across sessions, demonstrating real-world 
-data management.
+reads and writes scores within a session, demonstrating 
+real-world data management.
 
 * Game Logic: Designing a coordinate system using nested lists 
 that correctly handles ship placement, overlap detection, 
@@ -197,7 +197,7 @@ the terminal output easy to read and visually engaging.
 |---------|--------|---------|
 | Ships (S) | Green | Shows player fleet position clearly |
 | Hits (X) | Red | Immediate visual indicator of damage |
-| Misses (O) | White | Distinguishes misses from water |
+| Misses (O) | Blue | Distinguishes misses from water |
 | Water (~) | Blue | Fills empty board cells |
 | Headers | Cyan | Separates sections clearly |
 | Victory | Bright Green | Celebrates win condition |
@@ -225,12 +225,12 @@ flowcharts to map out the primary loops of the game.
 * Ship Deployment Flow: Checks if a ship is within bounds and 
 not overlapping before confirming placement.
 
-[EXISTING FLOWCHART SCREENSHOT]
+<img width="1443" height="426" alt="Screenshot 2026-03-26 at 15 28 23" src="https://github.com/user-attachments/assets/73bfb2f5-1153-492d-a203-bfe2b0c4e89e" />
 
 * Combat Loop: Tracks the process from a player entering 
 coordinates to the computer calculating its counter-attack.
 
-[EXISTING FLOWCHART SCREENSHOT]
+<img width="1670" height="435" alt="Screenshot 2026-03-26 at 15 31 50" src="https://github.com/user-attachments/assets/068663f1-d9d5-4616-864d-fd86fb15ab27" />
 
 ## Technologies Used
 
