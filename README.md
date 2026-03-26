@@ -311,7 +311,7 @@ before each shot is accepted.
 #### Unfixed Bugs
 * There are no known unfixed bugs at the time of submission.
 
-#### Deployment
+## Deployment
 
 * The application was deployed to Heroku using the Code Institute 
 mock terminal template. Steps to deploy:
@@ -339,7 +339,7 @@ To run locally:
 2. Install dependencies: pip install colorama
 3. Run the game: python3 run.py
 
-#### Credits
+## Credits
 
 #### Tools & Deployment
 
