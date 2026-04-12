@@ -239,27 +239,21 @@ validation, data handling, and terminal output.
 
 <img width="225" height="225" alt="image" src="https://github.com/user-attachments/assets/a1391b06-ac2b-49f7-8acc-12c0b9e0736b" />
 
-* colorama: Python library used to add colour to terminal output — 
-green for ships, red for hits, blue for water.
+* colorama: Python library used to add colour to terminal output — green for ships, red for hits, blue for water. Chosen specifically because it provides cross-platform terminal colour support without requiring a graphical interface.
 
-* json: Built-in Python library used to read and write the 
-leaderboard data to scores.json.
+* json: Built-in Python library used to read and write the leaderboard data to scores.json. Chosen as a lightweight built-in solution for data persistence that demonstrates real-world data handling without needing an external database.
 
 <img width="690" height="330" alt="image" src="https://github.com/user-attachments/assets/9a4709ea-cc69-4940-9637-d65b1ec15178" />
 
-* os: Built-in Python library used to clear the terminal screen 
-between turns for a clean display.
+* os: Built-in Python library used to clear the terminal screen between turns for a clean display. Chosen because it handles terminal operations across different operating systems consistently.
 
-* random: Built-in Python library used for the computer's random 
-ship placement and targeting logic.
+* random: Built-in Python library used for the computer's random ship placement and targeting logic. Chosen to provide unpredictable AI behaviour using Python's built-in random number generation, keeping the game challenging.
 
-* GitHub: Used for version control with descriptive commit messages 
-throughout development.
+* GitHub: Used for version control with descriptive commit messages throughout development. Chosen as the industry standard for source control, enabling the full development process to be tracked and documented.
 
 <img width="55" height="48" alt="Screenshot 2025-12-31 at 01 17 01" src="https://github.com/user-attachments/assets/677b4f69-8fa5-4573-982c-a763b75c5c87" />
 
-* Heroku: Used to deploy the CLI application to a cloud platform 
-using the CI mock terminal template.
+* Heroku: Used to deploy the CLI application to a cloud platform using the CI mock terminal template. Chosen as it supports the Code Institute mock terminal template and provides a free accessible deployment environment.
 
 <img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/6d24d21d-c742-4aed-abe0-a69d35373f7f" />
 
