@@ -242,10 +242,6 @@ validation, data handling, and terminal output.
 * colorama: Python library used to add colour to terminal output — 
 green for ships, red for hits, blue for water.
 
-##### Development Approach
-
-* A functional programming approach was chosen over object-oriented programming (OOP) for this project. The game logic is linear and sequential — each stage of the game flows naturally from one function to the next. Every function has a single clear responsibility, making the code easy to follow, test and maintain without the overhead of class structures. For a CLI project of this scope and complexity, functional programming is the most appropriate and readable solution.
-
 * json: Built-in Python library used to read and write the 
 leaderboard data to scores.json.
 
@@ -266,6 +262,10 @@ throughout development.
 using the CI mock terminal template.
 
 <img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/6d24d21d-c742-4aed-abe0-a69d35373f7f" />
+
+##### Development Approach
+
+* A functional programming approach was chosen over object-oriented programming (OOP) for this project. The game logic is linear and sequential — each stage of the game flows naturally from one function to the next. Every function has a single clear responsibility, making the code easy to follow, test and maintain without the overhead of class structures. For a CLI project of this scope and complexity, functional programming is the most appropriate and readable solution.
 
 ## Testing and Logic Validation
 
@@ -321,9 +321,11 @@ before each shot is accepted.
 mock terminal template. Steps to deploy:
 
 1. Create a new Heroku app from the Heroku dashboard
+
 2. Add the following buildpacks in order:
    - heroku/python
    - heroku/nodejs
+
 3. Ensure the following files are present in the repository:
    - requirements.txt (containing colorama)
    - Procfile (containing: web: node index.js)
@@ -331,7 +333,9 @@ mock terminal template. Steps to deploy:
    - package.json
    - index.js (mock terminal server)
    - views/index.html (terminal UI)
+
 4. Connect your GitHub repository to Heroku
+
 5. Push to Heroku using: git push heroku main
 
 * The live link can be found here:
