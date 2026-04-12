@@ -1,7 +1,10 @@
 import random
 import os
 import json
-from colorama import init, Fore, Style
+
+# External library: colorama — used for terminal colour output
+# Source: https://pypi.org/project/colorama/
+from colorama import init, Fore, Stylefrom colorama import init, Fore, Style
 
 # Initialise colorama for cross-platform terminal colour support
 init(autoreset=True)
