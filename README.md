@@ -242,6 +242,10 @@ validation, data handling, and terminal output.
 * colorama: Python library used to add colour to terminal output — 
 green for ships, red for hits, blue for water.
 
+##### Development Approach
+
+* A functional programming approach was chosen over object-oriented programming (OOP) for this project. The game logic is linear and sequential — each stage of the game flows naturally from one function to the next. Every function has a single clear responsibility, making the code easy to follow, test and maintain without the overhead of class structures. For a CLI project of this scope and complexity, functional programming is the most appropriate and readable solution.
+
 * json: Built-in Python library used to read and write the 
 leaderboard data to scores.json.
 
