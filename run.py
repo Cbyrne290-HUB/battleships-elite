@@ -4,7 +4,7 @@ import json
 
 # External library: colorama — used for terminal colour output
 # Source: https://pypi.org/project/colorama/
-from colorama import init, Fore, Stylefrom colorama import init, Fore, Style
+from colorama import init, Fore, Style
 
 # Initialise colorama for cross-platform terminal colour support
 init(autoreset=True)
@@ -151,11 +151,17 @@ def can_place_ship(board, row, col, length, horizontal):
     Check whether a ship of given length fits at (row, col).
     Returns True if placement is valid.
     """
+    # Loop through each cell the ship would occupy
     for i in range(length):
+        # Calculate row and col based on orientation
+        # If horizontal, row stays fixed and col increases
+        # If vertical, col stays fixed and row increases
         r = row if horizontal else row + i
         c = col + i if horizontal else col
+        # Reject placement if any cell is outside board boundaries
         if not validate_coordinates(r, c):
             return False
+        # Reject placement if any cell is already occupied
         if board[r][c] != "~":
             return False
     return True
@@ -164,9 +170,12 @@ def can_place_ship(board, row, col, length, horizontal):
 def place_ship_on_board(board, row, col, length, horizontal,
                         marker="S"):
     """Place a ship on the board by marking cells with marker."""
+    # Loop through each cell the ship occupies
     for i in range(length):
+        # Calculate position based on orientation
         r = row if horizontal else row + i
         c = col + i if horizontal else col
+        # Mark the cell with the ship marker (default 'S')
         board[r][c] = marker
 
 
@@ -321,18 +330,24 @@ def player_turn(computer_hidden_board, computer_display_board,
     Returns True if all computer ships are sunk.
     """
     print(Fore.CYAN + "── YOUR TURN ────────────────────────")
+    # Get valid coordinates from the player
     row, col = get_shot_coordinates(shots_taken)
+    # Record this shot so it cannot be repeated
     shots_taken.add((row, col))
 
+    # Check the hidden board to see if a ship occupies this cell
     if computer_hidden_board[row][col] == "S":
         print(Fore.RED + "💥 HIT!")
+        # Mark hit on both hidden tracking board and display board
         computer_hidden_board[row][col] = "X"
         computer_display_board[row][col] = "X"
     else:
         print(Fore.BLUE + "🌊 MISS!")
+        # Mark miss on hidden board as 'M' and display board as 'O'
         computer_hidden_board[row][col] = "M"
         computer_display_board[row][col] = "O"
 
+    # Check if all enemy ships have been sunk to determine win
     return all(
         computer_hidden_board[r][c] != "S"
         for r in range(BOARD_SIZE)
@@ -346,25 +361,33 @@ def computer_turn(player_board, computer_shots):
     Avoids firing at already-shot coordinates.
     Returns True if all player ships are sunk.
     """
+    # Keep generating random coordinates until an unfired cell is found
     while True:
         row = random.randint(0, BOARD_SIZE - 1)
         col = random.randint(0, BOARD_SIZE - 1)
+        # Only accept coordinates not already fired at
         if (row, col) not in computer_shots:
             break
 
+    # Record the shot to prevent repeating it
     computer_shots.add((row, col))
+    # Convert row number to letter label for display
     row_label = ROW_LABELS[row]
 
+    # Check if the computer hit a player ship
     if player_board[row][col] == "S":
         print(
             Fore.RED +
             f"💥 Enemy hit your ship at {row_label}{col}!"
         )
+        # Mark the hit on the player board
         player_board[row][col] = "X"
     else:
         print(Fore.BLUE + f"🌊 Enemy missed at {row_label}{col}.")
+        # Mark the miss on the player board
         player_board[row][col] = "O"
 
+    # Check if all player ships have been sunk to determine loss
     return all(
         player_board[r][c] != "S"
         for r in range(BOARD_SIZE)
@@ -389,30 +412,40 @@ def play_game():
     Main game loop.
     Manages turn order, win conditions, and score saving.
     """
+    # Get the player's name before setting up the game
     player_name = get_player_name()
 
+    # Create separate boards for player and computer
     player_board = make_board()
     computer_hidden_board = make_board()
+    # Display board shows only hits and misses — hides computer ships
     computer_display_board = make_board()
 
+    # Player manually places their fleet before the game begins
     player_place_ships(player_board)
+    # Computer ships are placed randomly and hidden from the player
     place_computer_ships(computer_hidden_board)
 
+    # Sets to track shots fired by each side — prevents duplicates
     player_shots = set()
     computer_shots = set()
+    # Counter tracks how many turns the game lasts
     turns = 0
 
     print(Fore.YELLOW + "\n⚓ BATTLE STATIONS! The fight begins...\n")
 
     while True:
+        # Display both boards at the start of each turn
         print_both_boards(player_board, computer_display_board)
         turns += 1
 
+        # Player takes their shot first each turn
         player_won = player_turn(
             computer_hidden_board,
             computer_display_board,
             player_shots
         )
+        # Check if player has sunk all enemy ships
         if player_won:
             print_both_boards(player_board, computer_display_board)
             print(
@@ -420,10 +453,13 @@ def play_game():
                 f"\n🏆 VICTORY, {player_name}! "
                 f"You sank the fleet in {turns} turns!\n"
             )
+            # Save result to leaderboard
             save_score(player_name, "WIN", turns)
             break
 
+        # Computer takes their shot after the player
         computer_won = computer_turn(player_board, computer_shots)
+        # Check if computer has sunk all player ships
         if computer_won:
             print_both_boards(player_board, computer_display_board)
             print(
@@ -431,6 +467,7 @@ def play_game():
                 f"\n💀 DEFEAT, {player_name}. "
                 f"The enemy sank your fleet.\n"
             )
+            # Save result to leaderboard
             save_score(player_name, "LOSS", turns)
             break
 
